@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Builder</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6bff">
+<link rel="icon" href="resources/icons/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="resources/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #ffffff;
+  --bg2:   #eef3fb;
+  --bg3:   #dfe9fa;
+  --text:  #1a1f36;
+  --text2: #6b7280;
+  --text3: #9aa3b2;
+  --border:  rgba(31,45,90,0.08);
+  --border2: rgba(31,45,90,0.16);
+  --accent:      #2f6bff;
+  --accent2:     #00c2ff;
+  --accent-soft: rgba(47,107,255,0.10);
+  --accent-text: #ffffff;
+  --error:      #b3261e;
+  --error-soft: #fbeceb;
+  --warning:      #8a5a00;
+  --warning-soft: #fdf3e0;
+  --r:  10px;
+  --rl: 16px;
+  --shadow-sm: 0 1px 2px rgba(31,45,90,.06), 0 1px 3px rgba(31,45,90,.08);
+  --shadow-md: 0 8px 24px rgba(31,45,90,.12), 0 2px 6px rgba(31,45,90,.08);
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+/* Explicit manual override */
+:root[data-theme="dark"] {
+  --bg:    #14152c;
+  --bg2:   #1b1d3a;
+  --bg3:   #242650;
+  --text:  #f5f5fa;
+  --text2: #9795bd;
+  --text3: #666487;
+  --border:  rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.16);
+  --accent:      #6C5CE7;
+  --accent2:     #2fd3c7;
+  --accent-soft: rgba(108,92,231,0.18);
+  --accent-text: #ffffff;
+  --error:      #ff6b81;
+  --error-soft: rgba(255,107,129,0.14);
+  --warning:      #ffc542;
+  --warning-soft: rgba(255,197,66,0.14);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-md: 0 10px 28px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.5);
+}
+
+html, body { height: 100%; font-family: var(--font); background: var(--bg2); color: var(--text); font-size: 14px; line-height: 1.55; }
+
+.hidden { display: none !important; }
+
+/* ── ICONS ── */
+.icon-svg { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.icon-svg svg { width: 16px; height: 16px; display: block; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 16px;
+  border: 0.5px solid var(--border2); border-radius: var(--r);
+  background: var(--bg); color: var(--text);
+  font: 13px/1 var(--font); cursor: pointer; white-space: nowrap;
+  transition: background .13s, opacity .13s;
+}
+.btn:hover  { background: var(--bg3); }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--bg); }
+.btn-primary { background: var(--accent); color: var(--accent-text); border-color: transparent; height: 42px; padding: 0 22px; font-size: 14px; }
+.btn-primary:hover { opacity: .88; background: var(--accent); }
+.btn-tonal { background: var(--accent-soft); color: var(--accent); border-color: transparent; font-weight: 600; }
+.btn-tonal:hover { opacity: .8; background: var(--accent-soft); }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+.btn .icon-svg svg { width: 14px; height: 14px; }
+
+.split-btn { position: relative; display: inline-flex; align-items: stretch; }
+.split-btn-main { border-radius: var(--r) 0 0 var(--r); }
+.split-btn-toggle {
+  border-radius: 0 var(--r) var(--r) 0;
+  border-left: 0.5px solid var(--border2);
+  padding: 0 8px;
+  width: 26px;
+}
+.split-btn-menu {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  min-width: 140px;
+  background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--r);
+  box-shadow: var(--shadow-md);
+  padding: 4px; z-index: 20;
+}
+.split-btn-menu[hidden] { display: none; }
+.split-btn-menu-item {
+  display: block; width: 100%; text-align: left;
+  height: 30px; padding: 0 10px; border: 0; border-radius: calc(var(--r) - 2px);
+  background: transparent; color: var(--text);
+  font: 12px/1 var(--font); cursor: pointer;
+}
+.split-btn-menu-item:hover { background: var(--bg3); }
+
+/* ── INPUT ── */
+.input, textarea.input, select.input {
+  height: 42px; padding: 0 14px;
+  border: 0.5px solid var(--border2); border-radius: var(--r);
+  background: var(--bg); color: var(--text);
+  font: 13px/1 var(--font); outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text3); }
+textarea.input { height: auto; min-height: 72px; padding: 10px 14px; resize: vertical; line-height: 1.5; font-family: var(--font); }
+
+/* ── BADGE (small pill, unrelated to certification badges) ── */
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--bg3); color: var(--text3);
+  border: 0.5px solid var(--border);
+}
+.badge-warn { background: var(--warning-soft); color: var(--warning); }
+.badge-ok   { background: var(--accent-soft); color: var(--accent); }
+
+/* ══════════════════════════════════════════════════
+   APP CHROME
+══════════════════════════════════════════════════ */
+
+body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 56px; flex: none;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+.wordmark { font-size: 14px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.topbar-sep { width: 0.5px; height: 24px; background: var(--border2); flex: none; }
+.topbar select.input { width: auto; min-width: 160px; height: 36px; }
+.spacer { flex: 1 1 auto; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.tabbar {
+  display: flex; gap: 4px; align-items: center;
+  padding: 8px 16px; flex: none;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg2);
+}
+.tab-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 16px;
+  border: 0.5px solid transparent; border-radius: var(--r);
+  background: transparent; color: var(--text2);
+  font: 13px/1 var(--font); font-weight: 500; cursor: pointer;
+}
+.tab-btn:hover { background: var(--bg3); color: var(--text); }
+.tab-btn.active { background: var(--bg); color: var(--accent); border-color: var(--border2); box-shadow: var(--shadow-sm); }
+
+.main { flex: 1 1 auto; overflow: auto; background: var(--bg2); }
+
+/* ── EDIT TAB ── */
+#view-edit { padding: 20px; }
+#view-experience { padding: 20px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-auto-flow: dense;
+  gap: 16px;
+  align-items: start;
+}
+.card-wide { grid-column: 1 / -1; }
+.card {
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--rl);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+.card > h2, .card-header h2 {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text2);
+}
+.card > h2::before, .card-header h2::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent2); flex: none;
+}
+.card > h2 { margin-bottom: 12px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.card-header h2 { margin: 0; }
+
+.field { margin-bottom: 10px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block; font-size: 11.5px; font-weight: 600; color: var(--text3);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: .03em;
+}
+.field-row { display: flex; gap: 8px; }
+.field-row .field { flex: 1 1 0; min-width: 0; }
+
+.card-stat-number { font-size: 32px; font-weight: 700; line-height: 1; margin: 4px 0 2px; }
+.card-stat-label { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+
+/* ── LIST ITEMS (used inside modals: achievements) ── */
+.list-item {
+  border: 0.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px;
+  margin-bottom: 8px;
+  background: var(--bg2);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.list-item:last-child { margin-bottom: 0; }
+.list-item.dragging { opacity: .4; }
+.list-item-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.list-item-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; flex: none; }
+
+.drag-handle {
+  cursor: grab; user-select: none; flex: none;
+  color: var(--text3);
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 32px;
+}
+.drag-handle:active { cursor: grabbing; }
+.drag-handle svg { width: 14px; height: 14px; }
+
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex: none;
+  border: 0.5px solid var(--border2); border-radius: var(--r);
+  background: var(--bg); color: var(--text2);
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg3); color: var(--text); }
+.icon-btn-danger:hover { color: var(--error); border-color: var(--error); }
+
+.add-row-btn { margin-top: 10px; width: 100%; }
+
+/* ── CHIPS (skills) ── */
+.chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500;
+  padding: 4px 6px 4px 10px; border-radius: 20px;
+  background: var(--bg3); color: var(--text);
+  border: 0.5px solid var(--border);
+  cursor: grab;
+}
+.chip.dragging { opacity: .4; }
+.chip.chip-static { cursor: default; padding: 4px 10px; }
+.chip .chip-x {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: transparent; border: none; color: var(--text3);
+  cursor: pointer; font-size: 13px; line-height: 1;
+}
+.chip .chip-x:hover { background: var(--border2); color: var(--error); }
+
+.empty-hint { color: var(--text3); font-size: 12px; padding: 4px 2px; }
+
+/* ── EXPERIENCE TAB (inline accordion) ── */
+.exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.exp-panel {
+  border: 0.5px solid var(--border); border-radius: var(--r);
+  background: var(--bg2); padding: 14px; margin-top: 8px;
+}
+
+/* ── DASHBOARD ROWS (read-only summary + edit/delete/reorder) ── */
+.dashboard-list { display: flex; flex-direction: column; gap: 8px; }
+.dashboard-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px; border: 0.5px solid var(--border); border-radius: var(--r);
+  background: var(--bg2);
+}
+.dashboard-row.dragging { opacity: .4; }
+.dashboard-row-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dashboard-row-body-media { flex-direction: row; align-items: center; gap: 10px; }
+.dashboard-row-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.dashboard-row-sub { font-size: 12px; color: var(--text2); }
+.dashboard-row-sub.line-clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dashboard-row-actions { display: flex; gap: 6px; flex: none; align-self: flex-start; padding-top: 2px; }
+
+.dashboard-icon-thumb {
+  width: 32px; height: 32px; flex: none; border-radius: 50%; overflow: hidden;
+  background: var(--bg3); color: var(--text2);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+}
+.dashboard-icon-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.dashboard-icon-thumb svg { width: 100%; height: 100%; display: block; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(10,14,24,.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-panel {
+  background: var(--bg); border-radius: var(--rl); box-shadow: var(--shadow-md);
+  width: 480px; max-width: 100%; max-height: 86vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-panel.modal-wide { width: 640px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 0.5px solid var(--border); flex: none;
+}
+.modal-title { font-size: 15px; font-weight: 700; }
+.modal-body { padding: 18px; overflow-y: auto; flex: 1 1 auto; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 14px 18px; border-top: 0.5px solid var(--border); flex: none;
+}
+.modal-form .field { margin-bottom: 14px; }
+.modal-form .field:last-child { margin-bottom: 0; }
+.modal-chip-area { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 20px; }
+
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 10px 16px; }
+}
+
+/* ── PREVIEW TAB ── */
+#view-preview { display: flex; flex-direction: column; height: 100%; }
+.preview-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; flex: none;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+.preview-toolbar select.input { width: auto; height: 32px; }
+.preview-wrap {
+  flex: 1 1 auto; overflow: auto;
+  background: var(--bg2);
+  display: flex; justify-content: center;
+  padding: 24px;
+}
+/* Light theme: --bg2 (#eef3fb) is close enough to the CV page's own white
+   paper background that the tiny remaining contrast still reads as an
+   unwanted seam around the page. Dark theme doesn't have this problem —
+   the page's white is nowhere near dark --bg2, so the contrast reads as
+   an intentional floating card instead. */
+:root[data-theme="light"] .preview-wrap { background: var(--bg); }
+.preview-frame-outer { flex: none; }
+#previewFrame {
+  border: none; background: transparent;
+  width: 1160px; max-width: 1160px;
+  height: 1131px;
+  display: block;
+  transform-origin: top center;
+}
+
+/* ── STATUS TOAST ── */
+#statusMsg {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--bg);
+  padding: 8px 16px; border-radius: var(--r);
+  font-size: 12.5px; z-index: 999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: opacity .25s, transform .25s;
+}
+#statusMsg.err { background: var(--error); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="wordmark">CV Builder</span>
+  <div class="topbar-sep"></div>
+  <select id="templateSelect" class="input" title="Template"></select>
+  <div class="spacer"></div>
+  <div class="topbar-actions">
+    <button class="btn btn-sm" id="btnThemeToggle" title="Theme"></button>
+    <div class="topbar-sep"></div>
+    <div class="split-btn" id="saveSplitBtn">
+      <button class="btn btn-sm split-btn-main" id="btnSaveHtml">Save HTML</button>
+      <button class="btn btn-sm split-btn-toggle" id="btnSaveMenuToggle" type="button" aria-haspopup="true" aria-expanded="false" title="More save options">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="split-btn-menu" id="saveMenu" hidden>
+        <button class="split-btn-menu-item" id="btnSavePdf" type="button">Save PDF</button>
+      </div>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="split-btn" id="jsonSaveSplitBtn">
+      <button class="btn btn-sm split-btn-main" id="btnSave">Save</button>
+      <button class="btn btn-sm split-btn-toggle" id="btnSaveAsToggle" type="button" aria-haspopup="true" aria-expanded="false" title="More save options">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="split-btn-menu" id="saveAsMenu" hidden>
+        <button class="split-btn-menu-item" id="btnSaveAs" type="button">Save As</button>
+      </div>
+    </div>
+    <span class="badge" id="fileStatus">No changes</span>
+    <button class="btn btn-sm" id="btnOpen">Open</button>
+    <input type="file" id="importFileInput" accept="application/json" class="hidden">
+    <button class="btn btn-sm" id="btnUploadCv" disabled title="Coming in phase 2">Upload CV</button>
+    <button class="btn btn-sm hidden" id="btnInstallApp">Install App</button>
+  </div>
+</div>
+
+<div class="tabbar">
+  <button class="tab-btn active" id="tabEdit" data-tab="edit">Edit</button>
+  <button class="tab-btn" id="tabExperience" data-tab="experience">Experience</button>
+  <button class="tab-btn" id="tabPreview" data-tab="preview">Preview</button>
+</div>
+
+<div class="main">
+  <div id="view-edit"></div>
+  <div id="view-experience" class="hidden"></div>
+  <div id="view-preview" class="hidden">
+    <div class="preview-toolbar">
+      <select id="zoomSelect" class="input">
+        <option value="0.75">75%</option>
+        <option value="1" selected>100%</option>
+        <option value="1.25">125%</option>
+      </select>
+      <div class="spacer"></div>
+    </div>
+    <div class="preview-wrap">
+      <div class="preview-frame-outer" id="previewFrameOuter">
+        <iframe id="previewFrame"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   DATA MODEL
+══════════════════════════════════════════════════ */
+
+function newId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+}
+
+function createEmptyCVData() {
+  return {
+    personal: {
+      fullName: '', roleTitle: '', specialization: '', primaryDomain: '',
+      location: '', cityCountry: '', email: '', phone: '', linkedinUrl: '',
+      shortProfileSummary: '', professionalSummary: '', footerTagline: '', additionalNote: '',
+    },
+    metrics: [
+      { id: newId(), label: 'Years experience', value: 0 },
+      { id: newId(), label: 'Projects count', value: 0 },
+      { id: newId(), label: 'APIs count', value: 0 },
+      { id: newId(), label: 'Certs count', value: 0 },
+    ],
+    skills: [],
+    industries: [],
+    certifications: [],
+    education: [],
+    languages: [],
+    experience: [],
+    projects: [],
+    techPanels: [],
+  };
+}
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   TEMPLATE FILL ENGINE — lets a template's render() fill the *actual*
+   designer HTML (resources/template/*.source.html, embedded verbatim as a
+   string by each <id>.template.js) instead of rebuilding markup by hand.
+   Three primitives, used together by convention:
+     {{TOKEN}}                                        — scalar substitution
+     <!--CVB:repeat NAME-->unit<!--CVB:endrepeat NAME-->     — one unit
+       repeated per array item (itemFn renders a single unit; it may itself
+       call these helpers again for nested repeats/tokens)
+     <!--CVB:section NAME-->body<!--CVB:endsection NAME-->   — body kept
+       when `present`, otherwise swapped for `fallback`
+   Every template's render(data, ctx) receives these via ctx so the app has
+   exactly one fill engine, not one per template.
+══════════════════════════════════════════════════ */
+
+function fillTokens(str, map) {
+  return str.replace(/\{\{([A-Z0-9_]+)\}\}/g, function (m, key) {
+    return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : '';
+  });
+}
+
+function expandRepeat(str, name, items, itemFn) {
+  var re = new RegExp('<!--CVB:repeat ' + name + '-->([\\s\\S]*?)<!--CVB:endrepeat ' + name + '-->');
+  var match = str.match(re);
+  if (!match) return str;
+  var unit = match[1];
+  var joined = (items || []).map(function (item, idx) { return itemFn(unit, item, idx); }).join('');
+  return str.slice(0, match.index) + joined + str.slice(match.index + match[0].length);
+}
+
+function expandSection(str, name, present, fillFn, fallback) {
+  var re = new RegExp('<!--CVB:section ' + name + '-->([\\s\\S]*?)<!--CVB:endsection ' + name + '-->');
+  var match = str.match(re);
+  if (!match) return str;
+  var body = present ? fillFn(match[1]) : (fallback != null ? fallback : '');
+  return str.slice(0, match.index) + body + str.slice(match.index + match[0].length);
+}
+
+/* ══════════════════════════════════════════════════
+   RESOURCE LOADER — templates live under resources/ as self-registering
+   classic <script> files (NOT fetch/JSON), so this keeps working when
+   index.html is opened directly via file:// with no local server. See
+   resources/template/manifest.js for how to add new ones.
+══════════════════════════════════════════════════ */
+
+var TEMPLATES = {};
+
+function loadResourceSet(manifestSrc, getManifestList, baseDir) {
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      s.onload = function () { resolve(src); };
+      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  return loadScript(manifestSrc).then(function () {
+    var entries = getManifestList() || [];
+    return Promise.all(entries.map(function (entry) {
+      return loadScript(baseDir + entry.file)
+        .then(function () { return { ok: true, id: entry.id, file: entry.file }; })
+        .catch(function () { return { ok: false, id: entry.id, file: entry.file }; });
+    }));
+  }).then(function (results) {
+    return {
+      loaded: results.filter(function (r) { return r.ok; }).map(function (r) { return r.id; }),
+      failed: results.filter(function (r) { return !r.ok; }),
+    };
+  }).catch(function (err) {
+    return { loaded: [], failed: [{ id: '(manifest)', file: manifestSrc, error: String(err) }] };
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   STATE + PERSISTENCE
+══════════════════════════════════════════════════ */
+
+// sessionStorage, not localStorage: CV data must not survive into a new
+// tab/window, only across a refresh of the same tab.
+var STORAGE_KEY = 'cvbuilder-state';
+
+// Metrics *labels* (not values) persist across tabs/browser restarts —
+// they're the field schema the user has built up, unlike the numeric
+// values which are session-only (see STORAGE_KEY above).
+var METRICS_LABELS_KEY = 'cvbuilder-metrics-labels';
+
+var state = {
+  data: createEmptyCVData(),
+  activeTemplateId: 'leadex-ops-dashboard',
+  activeTab: 'edit',
+  // File System Access API handle from the last successful Open/Save As
+  // this session, or null. Intentionally never persisted (handles aren't
+  // serializable) — every fresh page load starts with no file association.
+  fileHandle: null,
+  // True whenever state.data has changed since the last save/open baseline.
+  dirty: false,
+  // True once a real Save/Save As/Open has completed at least once this
+  // session (distinguishes "No changes" from "Saved" when dirty is false).
+  everSavedOrOpened: false,
+};
+
+function isPlainObject(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+
+function ensureId(item) {
+  if (!item || typeof item !== 'object') return null;
+  var out = Object.assign({}, item);
+  if (typeof out.id !== 'string' || !out.id) out.id = newId();
+  return out;
+}
+
+// soft-merge helpers ---------------------------------------------------
+
+function mergeScalar(val, fallback) {
+  if (typeof fallback === 'number') return typeof val === 'number' && isFinite(val) ? val : fallback;
+  if (typeof fallback === 'string') return typeof val === 'string' ? val : fallback;
+  return val === undefined ? fallback : val;
+}
+
+function mergePersonal(src) {
+  var defaults = createEmptyCVData().personal;
+  var out = {};
+  Object.keys(defaults).forEach(function (k) {
+    out[k] = mergeScalar(src && src[k], defaults[k]);
+  });
+  return out;
+}
+
+// Detects the OLD scalar {yearsExperience,projectsCount,apisCount,certsCount}
+// metrics shape (real risk: existing localStorage almost certainly has this
+// shape right now) and maps its 4 known keys to labeled rows so a returning
+// user's real numbers don't silently vanish. Anything already array-shaped
+// (the new shape) or garbage passes through untouched — mergeArray already
+// drops non-arrays to [] on its own.
+function migrateLegacyMetrics(src) {
+  if (!isPlainObject(src)) return src;
+  var legacyKeys = ['yearsExperience', 'projectsCount', 'apisCount', 'certsCount'];
+  var isLegacyShape = legacyKeys.some(function (k) { return Object.prototype.hasOwnProperty.call(src, k); });
+  if (!isLegacyShape) return src;
+  function num(v) { return (typeof v === 'number' && isFinite(v)) ? v : 0; }
+  return [
+    { label: 'Years experience', value: num(src.yearsExperience) },
+    { label: 'Projects count', value: num(src.projectsCount) },
+    { label: 'APIs count', value: num(src.apisCount) },
+    { label: 'Certs count', value: num(src.certsCount) },
+  ];
+}
+
+// Array merge: keep only well-formed items (plain objects), ensure id,
+// and fill missing known fields with '' defaults per-shape.
+function mergeArray(src, shapeDefaults) {
+  if (!Array.isArray(src)) return [];
+  var out = [];
+  src.forEach(function (item) {
+    if (!isPlainObject(item)) return;
+    var withId = ensureId(item);
+    if (!withId) return;
+    var clean = { id: withId.id };
+    Object.keys(shapeDefaults).forEach(function (k) {
+      var dv = shapeDefaults[k];
+      if (Array.isArray(dv)) {
+        clean[k] = Array.isArray(withId[k]) ? withId[k] : [];
+      } else if (typeof dv === 'number') {
+        clean[k] = (typeof withId[k] === 'number' && isFinite(withId[k])) ? withId[k] : dv;
+      } else {
+        clean[k] = typeof withId[k] === 'string' ? withId[k] : dv;
+      }
+    });
+    out.push(clean);
+  });
+  return out;
+}
+
+function mergeExperience(src) {
+  if (!Array.isArray(src)) return [];
+  var out = [];
+  src.forEach(function (item) {
+    if (!isPlainObject(item)) return;
+    var withId = ensureId(item);
+    if (!withId) return;
+    var achievements = mergeArray(withId.achievements, { text: '' });
+    out.push({
+      id: withId.id,
+      position: typeof withId.position === 'string' ? withId.position : '',
+      company: typeof withId.company === 'string' ? withId.company : '',
+      location: typeof withId.location === 'string' ? withId.location : '',
+      dateFrom: typeof withId.dateFrom === 'string' ? withId.dateFrom : '',
+      dateTo: typeof withId.dateTo === 'string' ? withId.dateTo : '',
+      achievements: achievements,
+    });
+  });
+  return out;
+}
+
+function mergeTechPanels(src) {
+  if (!Array.isArray(src)) return [];
+  var out = [];
+  src.forEach(function (item) {
+    if (!isPlainObject(item)) return;
+    var withId = ensureId(item);
+    if (!withId) return;
+    out.push({
+      id: withId.id,
+      title: typeof withId.title === 'string' ? withId.title : '',
+      bullets: mergeArray(withId.bullets, { text: '' }),
+    });
+  });
+  return out;
+}
+
+function mergeCVData(src) {
+  var defaults = createEmptyCVData();
+  if (!isPlainObject(src)) return defaults;
+  return {
+    personal: mergePersonal(src.personal),
+    metrics: mergeArray(migrateLegacyMetrics(src.metrics), { label: '', value: 0 }),
+    skills: mergeArray(src.skills, { label: '' }),
+    industries: mergeArray(src.industries, { title: '', description: '' }),
+    certifications: mergeArray(src.certifications, { title: '' }),
+    education: mergeArray(src.education, { title: '', org: '', year: '' }),
+    languages: mergeArray(src.languages, { name: '', level: '' }),
+    experience: mergeExperience(src.experience),
+    projects: mergeArray(src.projects, { name: '', description: '' }),
+    techPanels: mergeTechPanels(src.techPanels),
+  };
+}
+
+// persistence ------------------------------------------------------------
+
+var saveTimer = null;
+function schedulePersist() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    saveTimer = null;
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        data: state.data,
+        activeTemplateId: state.activeTemplateId,
+        activeTab: state.activeTab,
+      }));
+    } catch (e) { /* storage full / unavailable — ignore */ }
+  }, 400);
+}
+
+function loadFromStorage() {
+  var raw;
+  try { raw = sessionStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
+  if (!raw) {
+    var fallbackMetrics = loadMetricsLabelsFallback();
+    if (fallbackMetrics) state.data.metrics = fallbackMetrics;
+    return;
+  }
+  var parsed;
+  try { parsed = JSON.parse(raw); } catch (e) { return; }
+  if (!isPlainObject(parsed)) return;
+  state.data = mergeCVData(parsed.data);
+  if (typeof parsed.activeTemplateId === 'string' && TEMPLATES[parsed.activeTemplateId]) {
+    state.activeTemplateId = parsed.activeTemplateId;
+  }
+  if (parsed.activeTab === 'edit' || parsed.activeTab === 'experience' || parsed.activeTab === 'preview') {
+    state.activeTab = parsed.activeTab;
+  }
+}
+
+// Persists just the metric field *names*, in order, to localStorage —
+// deliberately excludes values (those stay session-scoped, see above).
+function persistMetricsLabels(metrics) {
+  try {
+    localStorage.setItem(METRICS_LABELS_KEY, JSON.stringify(metrics.map(function (m) { return m.label; })));
+  } catch (e) { /* storage full / unavailable — ignore */ }
+}
+
+// Returns a fresh metrics array (values reset to 0) built from the last
+// saved label list, or null if nothing was ever saved (caller keeps
+// createEmptyCVData's hardcoded defaults in that case). An explicitly
+// saved empty list ([]) is respected, not treated as "nothing saved".
+function loadMetricsLabelsFallback() {
+  var raw;
+  try { raw = localStorage.getItem(METRICS_LABELS_KEY); } catch (e) { raw = null; }
+  if (raw === null) return null;
+  var labels;
+  try { labels = JSON.parse(raw); } catch (e) { return null; }
+  if (!Array.isArray(labels)) return null;
+  return labels.map(function (label) {
+    return { id: newId(), label: typeof label === 'string' ? label : '', value: 0 };
+  });
+}
+
+// Reflects state.dirty / state.everSavedOrOpened onto the toolbar status
+// badge (#fileStatus). Call after anything that changes either flag.
+function updateFileStatus() {
+  var el = byId('fileStatus');
+  if (!el) return;
+  if (state.dirty) {
+    el.textContent = 'Unsaved changes';
+    el.className = 'badge badge-warn';
+  } else if (state.everSavedOrOpened) {
+    el.textContent = 'Saved';
+    el.className = 'badge badge-ok';
+  } else {
+    el.textContent = 'No changes';
+    el.className = 'badge';
+  }
+}
+
+// Marks the in-memory data as matching what's on disk (last successful
+// Save / Save As / Open). Never call this from plain data-mutation paths.
+function markSaved() {
+  state.dirty = false;
+  state.everSavedOrOpened = true;
+  updateFileStatus();
+}
+
+// Called any time state.data mutates structurally (add/remove/reorder/import).
+function onDataChanged() {
+  state.dirty = true;
+  updateFileStatus();
+  schedulePersist();
+  renderAll();
+}
+
+// Called for scalar field edits — persist but do NOT rebuild DOM.
+function onScalarChanged() {
+  state.dirty = true;
+  updateFileStatus();
+  schedulePersist();
+  refreshPreviewIfActive();
+}
+
+/* ══════════════════════════════════════════════════
+   GENERIC DOM HELPERS
+══════════════════════════════════════════════════ */
+
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if (attrs) {
+    Object.keys(attrs).forEach(function (k) {
+      if (k === 'class') el.className = attrs[k];
+      else if (k === 'html') el.innerHTML = attrs[k];
+      else if (k.indexOf('on') === 0 && typeof attrs[k] === 'function') el[k] = attrs[k];
+      else if (attrs[k] !== undefined && attrs[k] !== null) el.setAttribute(k, attrs[k]);
+    });
+  }
+  (children || []).forEach(function (c) {
+    if (c == null) return;
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return el;
+}
+
+function byId(id) { return document.getElementById(id); }
+
+// Generic reorder: given an array and a from/to index, splice-move.
+function moveItem(arr, fromIdx, toIdx) {
+  if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= arr.length || toIdx >= arr.length) return;
+  var item = arr.splice(fromIdx, 1)[0];
+  arr.splice(toIdx, 0, item);
+}
+
+// Wire native HTML5 drag-and-drop reordering onto a set of row elements
+// inside a container. `getList` returns the backing array; `onReordered`
+// is called after mutating it (should re-render + persist).
+function wireDragReorder(container, rowSelector, getList, onReordered) {
+  var dragFromId = null;
+  container.querySelectorAll(rowSelector).forEach(function (row) {
+    row.addEventListener('dragstart', function (ev) {
+      dragFromId = row.getAttribute('data-id');
+      row.classList.add('dragging');
+      ev.dataTransfer.effectAllowed = 'move';
+      try { ev.dataTransfer.setData('text/plain', dragFromId); } catch (e) {}
+    });
+    row.addEventListener('dragend', function () {
+      row.classList.remove('dragging');
+    });
+    row.addEventListener('dragover', function (ev) {
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'move';
+    });
+    row.addEventListener('drop', function (ev) {
+      ev.preventDefault();
+      var toId = row.getAttribute('data-id');
+      if (!dragFromId || dragFromId === toId) return;
+      var list = getList();
+      var fromIdx = list.findIndex(function (it) { return it.id === dragFromId; });
+      var toIdx = list.findIndex(function (it) { return it.id === toId; });
+      if (fromIdx === -1 || toIdx === -1) return;
+      moveItem(list, fromIdx, toIdx);
+      dragFromId = null;
+      onReordered();
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   ICONS (small inline SVG set — replaces text glyphs like × / ☰)
+══════════════════════════════════════════════════ */
+
+var ICON_PATHS = {
+  trash: '<path d="M4 7h16"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+  pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  grip: '<circle cx="9" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  chevronDown: '<polyline points="6 9 12 15 18 9"/>',
+  chevronUp: '<polyline points="18 15 12 9 6 15"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>',
+  monitor: '<rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/>',
+};
+
+function icon(name) {
+  var span = document.createElement('span');
+  span.className = 'icon-svg';
+  span.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (ICON_PATHS[name] || '') + '</svg>';
+  return span;
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════ */
+
+function openModal(opts) {
+  var overlay = h('div', { class: 'modal-overlay' });
+  var panel = h('div', { class: 'modal-panel' + (opts.wide ? ' modal-wide' : '') });
+
+  var closeBtn = h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Close' }, [icon('x')]);
+  closeBtn.onclick = function () { close(); };
+  var header = h('div', { class: 'modal-header' }, [h('h3', { class: 'modal-title' }, [opts.title]), closeBtn]);
+
+  var body = h('div', { class: 'modal-body' }, [opts.bodyEl]);
+
+  var footer;
+  if (opts.onSave) {
+    var cancelBtn = h('button', { class: 'btn', type: 'button' }, ['Cancel']);
+    cancelBtn.onclick = function () { close(); };
+    var saveBtn = h('button', { class: 'btn btn-primary', type: 'button' }, [opts.saveLabel || 'Save']);
+    saveBtn.onclick = function () { opts.onSave(close); };
+    footer = h('div', { class: 'modal-footer' }, [cancelBtn, saveBtn]);
+  } else {
+    var doneBtn = h('button', { class: 'btn btn-primary', type: 'button' }, ['Done']);
+    doneBtn.onclick = function () { close(); };
+    footer = h('div', { class: 'modal-footer' }, [doneBtn]);
+  }
+
+  panel.appendChild(header);
+  panel.appendChild(body);
+  panel.appendChild(footer);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  function close() {
+    document.removeEventListener('keydown', onKeydown);
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+  function onKeydown(ev) { if (ev.key === 'Escape') close(); }
+  document.addEventListener('keydown', onKeydown);
+  overlay.addEventListener('mousedown', function (ev) { if (ev.target === overlay) close(); });
+
+  setTimeout(function () {
+    var first = body.querySelector('input, textarea, select');
+    if (first) first.focus();
+  }, 30);
+
+  return { close: close };
+}
+
+// Builds a plain labeled-fields form for a modal body. `fieldDefs`:
+// [{key, label, type: 'text'|'textarea'}]. Returns {el, read()}.
+function buildFieldForm(fieldDefs, item) {
+  var wrap = h('div', { class: 'modal-form' });
+  var inputs = {};
+  fieldDefs.forEach(function (f) {
+    var input;
+    if (f.type === 'textarea') {
+      input = h('textarea', { class: 'input' }, []);
+      input.value = item[f.key] || '';
+    } else {
+      input = h('input', { class: 'input', type: 'text', value: item[f.key] || '' });
+    }
+    inputs[f.key] = input;
+    wrap.appendChild(h('div', { class: 'field' }, [h('label', {}, [f.label]), input]));
+  });
+  return {
+    el: wrap,
+    read: function () {
+      var out = {};
+      fieldDefs.forEach(function (f) { out[f.key] = inputs[f.key].value; });
+      return out;
+    },
+  };
+}
+
+/* ══════════════════════════════════════════════════
+   GENERIC "ADD → MODAL → DASHBOARD CARD" LIST SECTION
+   Used by Projects / Education / Languages / Certifications / Industries /
+   Experience. `opts`:
+     listKey        state.data[listKey] array key
+     title          card heading
+     addLabel       "+ Add X" button label
+     openItemModal(item|null, onSave)  — item is null when adding;
+                    call onSave(plainDataWithoutId) when the user saves
+     renderSummary(item) -> DOM node   — compact dashboard-row content
+══════════════════════════════════════════════════ */
+
+function buildListManageBody(opts) {
+  var wrap = h('div', { id: 'card-' + opts.listKey });
+
+  var addBtn = h('button', { class: 'btn btn-tonal btn-sm', type: 'button' }, [icon('plus'), document.createTextNode(' ' + opts.addLabel)]);
+  addBtn.onclick = function () {
+    opts.openItemModal(null, function (newData) {
+      state.data[opts.listKey].push(Object.assign({ id: newId() }, newData));
+      onDataChanged();
+      renderListDashboard(opts, container);
+    });
+  };
+  wrap.appendChild(h('div', { class: 'card-header' }, [h('h2', {}, [opts.title]), addBtn]));
+
+  var container = h('div', { id: 'list-' + opts.listKey, class: 'dashboard-list' });
+  wrap.appendChild(container);
+  renderListDashboard(opts, container);
+  return wrap;
+}
+
+function buildCounterCard(opts) {
+  var card = h('div', { class: 'card card-stat', id: 'card-' + opts.listKey });
+  card.appendChild(h('h2', {}, [opts.title]));
+
+  var count = state.data[opts.listKey].length;
+  card.appendChild(h('div', { class: 'card-stat-number' }, [String(count)]));
+  card.appendChild(h('div', { class: 'card-stat-label' }, [count === 1 ? '1 added' : count + ' added']));
+
+  var manageBtn = h('button', { class: 'btn add-row-btn', type: 'button' }, ['Manage ' + opts.title]);
+  manageBtn.onclick = function () {
+    openModal({ title: opts.title, wide: true, bodyEl: buildListManageBody(opts) });
+  };
+  card.appendChild(manageBtn);
+  return card;
+}
+
+function renderListDashboard(opts, containerEl) {
+  var container = containerEl || byId('list-' + opts.listKey);
+  if (!container) return;
+
+  function refresh() {
+    renderListDashboard(opts, container);
+    onDataChanged();
+  }
+
+  container.innerHTML = '';
+  var list = state.data[opts.listKey];
+
+  if (!list.length) {
+    container.appendChild(h('div', { class: 'empty-hint' }, ['Nothing here yet.']));
+  }
+
+  list.forEach(function (item) {
+    var editBtn = h('button', { class: 'icon-btn', type: 'button', title: 'Edit' }, [icon('pencil')]);
+    editBtn.onclick = function () {
+      opts.openItemModal(item, function (updatedData) {
+        Object.assign(item, updatedData);
+        refresh();
+      });
+    };
+    var delBtn = h('button', { class: 'icon-btn icon-btn-danger', type: 'button', title: 'Remove' }, [icon('trash')]);
+    delBtn.onclick = function () {
+      state.data[opts.listKey] = state.data[opts.listKey].filter(function (it) { return it.id !== item.id; });
+      refresh();
+    };
+
+    var row = h('div', { class: 'dashboard-row', draggable: 'true', 'data-id': item.id }, [
+      h('span', { class: 'drag-handle', title: 'Drag to reorder' }, [icon('grip')]),
+      opts.renderSummary(item),
+      h('div', { class: 'dashboard-row-actions' }, [editBtn, delBtn]),
+    ]);
+    container.appendChild(row);
+  });
+
+  wireDragReorder(container, '.dashboard-row', function () { return state.data[opts.listKey]; }, refresh);
+}
+
+/* ══════════════════════════════════════════════════
+   EDIT TAB — build once, patch scalars directly
+══════════════════════════════════════════════════ */
+
+function buildEditTab() {
+  var root = byId('view-edit');
+  root.innerHTML = '';
+
+  var grid = h('div', { class: 'form-grid' }, [
+    buildPersonalMainCard(),
+    buildPersonalContactsCard(),
+    buildSkillsCard(),
+    buildMetricsCard(),
+    buildPersonalAdditionalCard(),
+    buildProjectsCard(),
+    buildEducationCard(),
+    buildCertificationsCard(),
+    buildLanguagesCard(),
+    buildIndustriesCard(),
+    buildTechPanelsCard(),
+  ]);
+  root.appendChild(grid);
+}
+
+// ---- Personal (inline, unchanged) --------------------------------------
+
+function buildPersonalMainCard() {
+  var p = state.data.personal;
+  var fields = [
+    ['fullName', 'Full name', 'text'],
+    ['roleTitle', 'Role title', 'text'],
+    ['specialization', 'Specialization', 'text'],
+    ['primaryDomain', 'Primary domain', 'text'],
+    ['location', 'Location', 'text'],
+  ];
+  var card = h('div', { class: 'card card-wide' }, [h('h2', {}, ['Personal — Main info'])]);
+
+  fields.forEach(function (f) {
+    var key = f[0], label = f[1];
+    var input = h('input', { class: 'input', type: 'text', value: p[key] || '' });
+    input.oninput = function () { state.data.personal[key] = input.value; onScalarChanged(); };
+    card.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), input]));
+  });
+
+  [['shortProfileSummary', 'Short profile summary'], ['professionalSummary', 'Professional summary']].forEach(function (f) {
+    var key = f[0], label = f[1];
+    var ta = h('textarea', { class: 'input' }, []);
+    ta.value = p[key] || '';
+    ta.oninput = function () { state.data.personal[key] = ta.value; onScalarChanged(); };
+    card.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), ta]));
+  });
+
+  return card;
+}
+
+function buildPersonalContactsCard() {
+  var p = state.data.personal;
+  var fields = [
+    ['email', 'Email', 'text'],
+    ['phone', 'Phone', 'text'],
+    ['linkedinUrl', 'LinkedIn URL', 'text'],
+    ['cityCountry', 'City / Country', 'text'],
+  ];
+  var card = h('div', { class: 'card' }, [h('h2', {}, ['Personal — Contacts'])]);
+
+  fields.forEach(function (f) {
+    var key = f[0], label = f[1];
+    var input = h('input', { class: 'input', type: 'text', value: p[key] || '' });
+    input.oninput = function () { state.data.personal[key] = input.value; onScalarChanged(); };
+    card.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), input]));
+  });
+
+  return card;
+}
+
+function buildPersonalAdditionalCard() {
+  var p = state.data.personal;
+  var fields = [
+    ['footerTagline', 'Footer tagline', 'text'],
+    ['additionalNote', 'Additional note', 'text'],
+  ];
+  var card = h('div', { class: 'card' }, [h('h2', {}, ['Personal — Additional info'])]);
+
+  fields.forEach(function (f) {
+    var key = f[0], label = f[1];
+    var input = h('input', { class: 'input', type: 'text', value: p[key] || '' });
+    input.oninput = function () { state.data.personal[key] = input.value; onScalarChanged(); };
+    card.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), input]));
+  });
+
+  return card;
+}
+
+// ---- Metrics (Skills-style: dashboard chips + add/remove/reorder modal) ----
+
+function buildMetricsCard() {
+  var card = h('div', { class: 'card dashboard-card', id: 'metricsCard' });
+  var editBtn = h('button', { class: 'btn btn-tonal btn-sm', type: 'button' }, [icon('pencil'), document.createTextNode(' Edit metrics')]);
+  editBtn.onclick = openMetricsModal;
+  card.appendChild(h('div', { class: 'card-header' }, [h('h2', {}, ['Metrics']), editBtn]));
+
+  var chipList = h('div', { class: 'chip-list', id: 'metricsChipList' });
+  card.appendChild(chipList);
+  renderMetricsChips(chipList);
+  return card;
+}
+
+function renderMetricsChips(chipListEl) {
+  var chipList = chipListEl || byId('metricsChipList');
+  if (!chipList) return;
+  chipList.innerHTML = '';
+  if (!state.data.metrics.length) {
+    chipList.appendChild(h('div', { class: 'empty-hint' }, ['No metrics yet.']));
+    return;
+  }
+  state.data.metrics.forEach(function (m) {
+    var text = (m.label || 'Untitled') + ': ' + (m.value != null ? m.value : 0);
+    chipList.appendChild(h('span', { class: 'chip chip-static' }, [text]));
+  });
+}
+
+// Every row always renders here regardless of value — 0 is only hidden at
+// *render* time (in each template's render()), never in this editor.
+function openMetricsModal() {
+  var draft = state.data.metrics.map(function (m) { return { id: m.id, label: m.label, value: m.value }; });
+  var rowsArea = h('div', {});
+
+  function renderRows() {
+    rowsArea.innerHTML = '';
+    if (!draft.length) rowsArea.appendChild(h('div', { class: 'empty-hint' }, ['No metrics yet.']));
+    draft.forEach(function (m) {
+      var labelInput = h('input', { class: 'input', type: 'text', value: m.label, placeholder: 'Label (e.g. Years experience)' });
+      labelInput.style.cssText = 'flex:1 1 auto; min-width:0;';
+      labelInput.oninput = function () { m.label = labelInput.value; };
+
+      var valueInput = h('input', { class: 'input', type: 'number', value: String(m.value != null ? m.value : 0) });
+      valueInput.style.cssText = 'flex:0 0 84px;';
+      valueInput.oninput = function () {
+        var v = parseFloat(valueInput.value);
+        m.value = isFinite(v) ? v : 0;
+      };
+
+      var rm = h('button', { class: 'icon-btn', type: 'button', title: 'Remove' }, [icon('trash')]);
+      rm.onclick = function () { draft = draft.filter(function (x) { return x.id !== m.id; }); renderRows(); };
+
+      var rowBody = h('div', { class: 'list-item-body' }, [labelInput, valueInput]);
+      rowBody.style.cssText = 'flex-direction: row; align-items: center;';
+
+      rowsArea.appendChild(h('div', { class: 'list-item', draggable: 'true', 'data-id': m.id }, [
+        h('span', { class: 'drag-handle', title: 'Drag to reorder' }, [icon('grip')]),
+        rowBody,
+        h('div', { class: 'list-item-actions' }, [rm]),
+      ]));
+    });
+    wireDragReorder(rowsArea, '.list-item', function () { return draft; }, renderRows);
+  }
+  renderRows();
+
+  var addBtn = h('button', { class: 'btn btn-sm add-row-btn', type: 'button' }, [icon('plus'), document.createTextNode(' Add metric')]);
+  addBtn.onclick = function () { draft.push({ id: newId(), label: '', value: 0 }); renderRows(); };
+
+  var body = h('div', { class: 'modal-form' }, [
+    h('div', { class: 'field' }, [h('label', {}, ['Metrics']), rowsArea, addBtn]),
+  ]);
+
+  openModal({
+    title: 'Edit metrics',
+    bodyEl: body,
+    onSave: function (close) { state.data.metrics = draft; persistMetricsLabels(draft); onDataChanged(); close(); },
+  });
+}
+
+// ---- Skills (modal add/remove, read-only dashboard chips) --------------
+
+function buildSkillsCard() {
+  var card = h('div', { class: 'card dashboard-card', id: 'skillsCard' });
+  var editBtn = h('button', { class: 'btn btn-tonal btn-sm', type: 'button' }, [icon('pencil'), document.createTextNode(' Edit skills')]);
+  editBtn.onclick = openSkillsModal;
+  card.appendChild(h('div', { class: 'card-header' }, [h('h2', {}, ['Skills']), editBtn]));
+
+  var chipList = h('div', { class: 'chip-list', id: 'skillsChipList' });
+  card.appendChild(chipList);
+  renderSkillsChips(chipList);
+  return card;
+}
+
+function renderSkillsChips(chipListEl) {
+  var chipList = chipListEl || byId('skillsChipList');
+  if (!chipList) return;
+  chipList.innerHTML = '';
+  if (!state.data.skills.length) {
+    chipList.appendChild(h('div', { class: 'empty-hint' }, ['No skills yet.']));
+    return;
+  }
+  state.data.skills.forEach(function (skill) {
+    chipList.appendChild(h('span', { class: 'chip chip-static' }, [skill.label]));
+  });
+}
+
+function openSkillsModal() {
+  var draft = state.data.skills.map(function (s) { return { id: s.id, label: s.label }; });
+  var chipArea = h('div', { class: 'modal-chip-area' });
+
+  function renderDraft() {
+    chipArea.innerHTML = '';
+    if (!draft.length) {
+      chipArea.appendChild(h('div', { class: 'empty-hint' }, ['No skills yet.']));
+      return;
+    }
+    draft.forEach(function (skill) {
+      var xBtn = h('button', { class: 'chip-x', type: 'button', title: 'Remove' }, ['×']);
+      xBtn.onclick = function () { draft = draft.filter(function (s) { return s.id !== skill.id; }); renderDraft(); };
+      chipArea.appendChild(h('span', { class: 'chip', draggable: 'true', 'data-id': skill.id }, [
+        document.createTextNode(skill.label), xBtn,
+      ]));
+    });
+    wireDragReorder(chipArea, '.chip', function () { return draft; }, renderDraft);
+  }
+  renderDraft();
+
+  var input = h('input', { class: 'input', type: 'text', placeholder: 'Type a skill and press Enter' });
+  input.onkeydown = function (ev) {
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault();
+    var v = input.value.trim();
+    if (!v) return;
+    draft.push({ id: newId(), label: v });
+    input.value = '';
+    renderDraft();
+  };
+
+  var body = h('div', { class: 'modal-form' }, [
+    h('div', { class: 'field' }, [h('label', {}, ['Add a skill']), input]),
+    h('div', { class: 'field' }, [h('label', {}, ['Skills']), chipArea]),
+  ]);
+
+  openModal({
+    title: 'Edit skills',
+    bodyEl: body,
+    onSave: function (close) { state.data.skills = draft; onDataChanged(); close(); },
+  });
+}
+
+// ---- Projects / Education / Languages / Industries (simple field forms) ----
+
+function buildProjectsCard() {
+  var FIELD_DEFS = [
+    { key: 'name', label: 'Name', type: 'text' },
+    { key: 'description', label: 'Description', type: 'textarea' },
+  ];
+  return buildCounterCard({
+    listKey: 'projects', title: 'Projects', addLabel: 'Add project',
+    openItemModal: function (item, onSave) {
+      var form = buildFieldForm(FIELD_DEFS, item || {});
+      openModal({
+        title: item ? 'Edit project' : 'Add project',
+        bodyEl: form.el,
+        onSave: function (close) { onSave(form.read()); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      return h('div', { class: 'dashboard-row-body' }, [
+        h('div', { class: 'dashboard-row-title' }, [item.name || 'Untitled project']),
+        item.description ? h('div', { class: 'dashboard-row-sub line-clamp' }, [item.description]) : null,
+      ]);
+    },
+  });
+}
+
+function buildEducationCard() {
+  var FIELD_DEFS = [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'org', label: 'Organization', type: 'text' },
+    { key: 'year', label: 'Year', type: 'text' },
+  ];
+  return buildCounterCard({
+    listKey: 'education', title: 'Education', addLabel: 'Add education',
+    openItemModal: function (item, onSave) {
+      var form = buildFieldForm(FIELD_DEFS, item || {});
+      openModal({
+        title: item ? 'Edit education' : 'Add education',
+        bodyEl: form.el,
+        onSave: function (close) { onSave(form.read()); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      var meta = [item.org, item.year].filter(Boolean).join(' · ');
+      return h('div', { class: 'dashboard-row-body' }, [
+        h('div', { class: 'dashboard-row-title' }, [item.title || 'Untitled']),
+        meta ? h('div', { class: 'dashboard-row-sub' }, [meta]) : null,
+      ]);
+    },
+  });
+}
+
+function buildLanguagesCard() {
+  var FIELD_DEFS = [
+    { key: 'name', label: 'Name', type: 'text' },
+    { key: 'level', label: 'Level', type: 'text' },
+  ];
+  return buildCounterCard({
+    listKey: 'languages', title: 'Languages', addLabel: 'Add language',
+    openItemModal: function (item, onSave) {
+      var form = buildFieldForm(FIELD_DEFS, item || {});
+      openModal({
+        title: item ? 'Edit language' : 'Add language',
+        bodyEl: form.el,
+        onSave: function (close) { onSave(form.read()); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      return h('div', { class: 'dashboard-row-body dashboard-row-body-media' }, [
+        h('div', { class: 'dashboard-row-title' }, [item.name || 'Untitled']),
+        item.level ? h('span', { class: 'badge' }, [item.level]) : null,
+      ]);
+    },
+  });
+}
+
+function buildIndustriesCard() {
+  var FIELD_DEFS = [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'description', label: 'Description', type: 'textarea' },
+  ];
+  return buildCounterCard({
+    listKey: 'industries', title: 'Industries', addLabel: 'Add industry',
+    openItemModal: function (item, onSave) {
+      var form = buildFieldForm(FIELD_DEFS, item || {});
+      openModal({
+        title: item ? 'Edit industry' : 'Add industry',
+        bodyEl: form.el,
+        onSave: function (close) { onSave(form.read()); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      var letter = (item.title || '').trim().charAt(0).toUpperCase() || '?';
+      var thumb = h('div', { class: 'dashboard-icon-thumb' }, [letter]);
+      return h('div', { class: 'dashboard-row-body dashboard-row-body-media' }, [
+        thumb,
+        h('div', { class: 'dashboard-row-body' }, [
+          h('div', { class: 'dashboard-row-title' }, [item.title || 'Untitled']),
+          item.description ? h('div', { class: 'dashboard-row-sub line-clamp' }, [item.description]) : null,
+        ]),
+      ]);
+    },
+  });
+}
+
+// ---- Certifications (title only, matches sibling cards) ----------------
+
+function buildCertificationsCard() {
+  return buildCounterCard({
+    listKey: 'certifications', title: 'Certifications', addLabel: 'Add certification',
+    openItemModal: function (item, onSave) {
+      var draft = { title: (item && item.title) || '' };
+      var titleInput = h('input', { class: 'input', type: 'text', value: draft.title, placeholder: 'e.g. AWS Certified Solutions Architect' });
+      titleInput.oninput = function () { draft.title = titleInput.value; };
+
+      var body = h('div', { class: 'modal-form' }, [
+        h('div', { class: 'field' }, [h('label', {}, ['Title']), titleInput]),
+      ]);
+
+      openModal({
+        title: item ? 'Edit certification' : 'Add certification',
+        bodyEl: body,
+        onSave: function (close) { onSave({ title: draft.title }); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      var letter = (item.title || '').trim().charAt(0).toUpperCase() || '?';
+      var thumb = h('div', { class: 'dashboard-icon-thumb' }, [letter]);
+      return h('div', { class: 'dashboard-row-body dashboard-row-body-media' }, [
+        thumb,
+        h('div', { class: 'dashboard-row-title' }, [item.title || 'Untitled certification']),
+      ]);
+    },
+  });
+}
+
+// ---- Technical expertise (modal: title + nested bullets editor) --------
+
+function buildTechPanelsCard() {
+  return buildCounterCard({
+    listKey: 'techPanels', title: 'Technical expertise', addLabel: 'Add panel',
+    openItemModal: function (item, onSave) {
+      var draft = {
+        title: (item && item.title) || '',
+        bullets: ((item && item.bullets) || []).map(function (b) { return { id: b.id || newId(), text: b.text || '' }; }),
+      };
+
+      var titleInput = h('input', { class: 'input', type: 'text', value: draft.title, placeholder: 'e.g. Architecture & delivery' });
+      titleInput.oninput = function () { draft.title = titleInput.value; };
+
+      var bulletArea = h('div', { class: 'achievements' });
+      function renderBullets() {
+        bulletArea.innerHTML = '';
+        if (!draft.bullets.length) bulletArea.appendChild(h('div', { class: 'empty-hint' }, ['No bullets yet.']));
+        draft.bullets.forEach(function (b) {
+          var input = h('input', { class: 'input', type: 'text', value: b.text, placeholder: 'Bullet point' });
+          input.oninput = function () { b.text = input.value; };
+          var rm = h('button', { class: 'icon-btn', type: 'button', title: 'Remove' }, [icon('trash')]);
+          rm.onclick = function () { draft.bullets = draft.bullets.filter(function (x) { return x.id !== b.id; }); renderBullets(); };
+          bulletArea.appendChild(h('div', { class: 'list-item', draggable: 'true', 'data-id': b.id }, [
+            h('span', { class: 'drag-handle', title: 'Drag to reorder' }, [icon('grip')]),
+            h('div', { class: 'list-item-body' }, [input]),
+            h('div', { class: 'list-item-actions' }, [rm]),
+          ]));
+        });
+        wireDragReorder(bulletArea, '.list-item', function () { return draft.bullets; }, renderBullets);
+      }
+      renderBullets();
+
+      var addBulletBtn = h('button', { class: 'btn btn-sm add-row-btn', type: 'button' }, [icon('plus'), document.createTextNode(' Add bullet')]);
+      addBulletBtn.onclick = function () { draft.bullets.push({ id: newId(), text: '' }); renderBullets(); };
+
+      var body = h('div', { class: 'modal-form' }, [
+        h('div', { class: 'field' }, [h('label', {}, ['Panel title']), titleInput]),
+        h('div', { class: 'field' }, [h('label', {}, ['Bullets']), bulletArea, addBulletBtn]),
+      ]);
+
+      openModal({
+        title: item ? 'Edit panel' : 'Add panel',
+        bodyEl: body,
+        onSave: function (close) { onSave({ title: draft.title, bullets: draft.bullets }); close(); },
+      });
+    },
+    renderSummary: function (item) {
+      var count = (item.bullets || []).length;
+      var body = h('div', { class: 'dashboard-row-body' }, [
+        h('div', { class: 'dashboard-row-title' }, [item.title || 'Untitled panel']),
+      ]);
+      if (count) body.appendChild(h('span', { class: 'badge' }, [count + (count === 1 ? ' bullet' : ' bullets')]));
+      return body;
+    },
+  });
+}
+
+// ---- Experience (own tab, inline accordion) ----
+
+var expandedExperienceIds = {};
+
+function buildExperienceTab() {
+  var root = byId('view-experience');
+  root.innerHTML = '';
+
+  var addBtn = h('button', { class: 'btn btn-tonal btn-sm', type: 'button' }, [icon('plus'), document.createTextNode(' Add position')]);
+  addBtn.onclick = function () {
+    var item = { id: newId(), position: '', company: '', location: '', dateFrom: '', dateTo: '', achievements: [] };
+    state.data.experience.push(item);
+    expandedExperienceIds[item.id] = true;
+    onDataChanged();
+  };
+
+  var card = h('div', { class: 'card' }, [
+    h('div', { class: 'card-header' }, [h('h2', {}, ['Experience']), addBtn]),
+  ]);
+
+  var list = h('div', { class: 'dashboard-list', id: 'list-experience' });
+  card.appendChild(list);
+  root.appendChild(card);
+
+  var experience = state.data.experience;
+  if (!experience.length) {
+    list.appendChild(h('div', { class: 'empty-hint' }, ['Nothing here yet.']));
+  }
+
+  experience.forEach(function (item) {
+    list.appendChild(buildExperienceItem(item));
+  });
+
+  wireDragReorder(list, '.dashboard-row', function () { return state.data.experience; }, onDataChanged);
+}
+
+function buildExperienceItem(item) {
+  var expanded = !!expandedExperienceIds[item.id];
+
+  var caretBtn = h('button', { class: 'icon-btn', type: 'button', title: expanded ? 'Collapse' : 'Expand' }, [icon(expanded ? 'chevronUp' : 'chevronDown')]);
+  caretBtn.onclick = function () {
+    expandedExperienceIds[item.id] = !expandedExperienceIds[item.id];
+    onDataChanged();
+  };
+  var delBtn = h('button', { class: 'icon-btn icon-btn-danger', type: 'button', title: 'Remove' }, [icon('trash')]);
+  delBtn.onclick = function () {
+    state.data.experience = state.data.experience.filter(function (it) { return it.id !== item.id; });
+    delete expandedExperienceIds[item.id];
+    onDataChanged();
+  };
+
+  var count = (item.achievements || []).length;
+  var metaParts = [item.company, [item.dateFrom, item.dateTo].filter(Boolean).join(' – ')].filter(Boolean);
+  var summaryBody = h('div', { class: 'dashboard-row-body' }, [
+    h('div', { class: 'dashboard-row-title' }, [item.position || 'New position']),
+    metaParts.length ? h('div', { class: 'dashboard-row-sub' }, [metaParts.join(' · ')]) : null,
+  ]);
+  if (count) summaryBody.appendChild(h('span', { class: 'badge' }, [count + (count === 1 ? ' achievement' : ' achievements')]));
+
+  var row = h('div', { class: 'dashboard-row', draggable: 'true', 'data-id': item.id }, [
+    h('span', { class: 'drag-handle', title: 'Drag to reorder' }, [icon('grip')]),
+    summaryBody,
+    h('div', { class: 'dashboard-row-actions' }, [caretBtn, delBtn]),
+  ]);
+
+  var wrap = h('div', { class: 'exp-item' }, [row]);
+  if (expanded) wrap.appendChild(buildExperiencePanel(item));
+  return wrap;
+}
+
+function buildExperiencePanel(item) {
+  function scalarField(key, label, placeholder) {
+    var input = h('input', { class: 'input', type: 'text', value: item[key] || '', placeholder: placeholder || label });
+    input.oninput = function () { item[key] = input.value; onScalarChanged(); };
+    return h('div', { class: 'field' }, [h('label', {}, [label]), input]);
+  }
+
+  var grid = h('div', { class: 'exp-grid' }, [
+    scalarField('position', 'Position'),
+    scalarField('company', 'Company'),
+    scalarField('location', 'Location'),
+    scalarField('dateFrom', 'Date from', 'e.g. 2020'),
+    scalarField('dateTo', 'Date to', 'e.g. Present'),
+  ]);
+
+  if (!item.achievements) item.achievements = [];
+  var achArea = h('div', { class: 'achievements' });
+  item.achievements.forEach(function (ach) {
+    var input = h('input', { class: 'input', type: 'text', value: ach.text, placeholder: 'Achievement' });
+    input.oninput = function () { ach.text = input.value; onScalarChanged(); };
+    var rm = h('button', { class: 'icon-btn', type: 'button', title: 'Remove' }, [icon('trash')]);
+    rm.onclick = function () {
+      item.achievements = item.achievements.filter(function (a) { return a.id !== ach.id; });
+      onDataChanged();
+    };
+    achArea.appendChild(h('div', { class: 'list-item', draggable: 'true', 'data-id': ach.id }, [
+      h('span', { class: 'drag-handle', title: 'Drag to reorder' }, [icon('grip')]),
+      h('div', { class: 'list-item-body' }, [input]),
+      h('div', { class: 'list-item-actions' }, [rm]),
+    ]));
+  });
+  if (!item.achievements.length) achArea.appendChild(h('div', { class: 'empty-hint' }, ['No achievements yet.']));
+  wireDragReorder(achArea, '.list-item', function () { return item.achievements; }, onDataChanged);
+
+  var addAchBtn = h('button', { class: 'btn btn-sm add-row-btn', type: 'button' }, [icon('plus'), document.createTextNode(' Add achievement')]);
+  addAchBtn.onclick = function () {
+    item.achievements.push({ id: newId(), text: '' });
+    onDataChanged();
+  };
+
+  return h('div', { class: 'exp-panel' }, [
+    grid,
+    h('div', { class: 'field' }, [h('label', {}, ['Achievements']), achArea, addAchBtn]),
+  ]);
+}
+
+/* ══════════════════════════════════════════════════
+   PREVIEW TAB
+══════════════════════════════════════════════════ */
+
+var previewLoaded = false;
+var previewNaturalHeight = 1131; // ~A4 fallback at 1160 width, until measured
+var previewResizeObserver = null;
+
+function renderContext() {
+  return {
+    esc: esc,
+    fillTokens: fillTokens, expandRepeat: expandRepeat, expandSection: expandSection,
+  };
+}
+
+function stripEditableArtifacts(html) {
+  var doc = new DOMParser().parseFromString(html, 'text/html');
+  var editable = doc.querySelectorAll('[contenteditable]');
+  for (var i = 0; i < editable.length; i++) {
+    editable[i].removeAttribute('contenteditable');
+  }
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+}
+
+function refreshPreview() {
+  var iframe = byId('previewFrame');
+  var tpl = TEMPLATES[state.activeTemplateId] || TEMPLATES[Object.keys(TEMPLATES)[0]];
+  previewLoaded = false;
+  if (previewResizeObserver) { previewResizeObserver.disconnect(); previewResizeObserver = null; }
+  var rendered = tpl ? stripEditableArtifacts(tpl.render(state.data, renderContext())) : '<p style="font-family:sans-serif;padding:2rem;">No template loaded.</p>';
+  // .page's `min-height: 100vh` resolves against this iframe's own height, which
+  // this same preview JS sets based on measuring content — a circular dependency
+  // that leaves a permanent small spurious scrollbar (vh floor + .page's own
+  // margin never reach a stable fixed point). Neutralize it for the live preview
+  // only, same as the templates' own @media print block already does.
+  //
+  // Also: `.page` has `margin: 24px auto`, and every template's own `html` rule
+  // paints a light decorative gradient behind it — that gradient is only ever
+  // meant to show around .page when this HTML is opened standalone in a full
+  // browser tab. Inside our preview iframe it shows through .page's own margin
+  // as a stray light-colored sliver against the app's preview-canvas color, in
+  // both app themes (the template's own light gradient has nothing to do with
+  // the app's dark/light toggle). Blank it out for the live preview only, same
+  // reasoning as the min-height override above.
+  //
+  // Also: `.page`'s own box-shadow (a soft 72px-blur dark-navy-tinted halo,
+  // meant to read as "floating card" when the canvas behind it visibly
+  // differs from the page) becomes the one remaining visible "frame" once the
+  // preview canvas is made to match the page's white exactly (light theme —
+  // see the `:root[data-theme="light"] .preview-wrap` rule) since it's then
+  // the only non-transparent thing left around .page's edges. Drop it for
+  // the live preview only, same reasoning as above.
+  var previewOnlyStyle = '<style>.page{min-height:0 !important;box-shadow:none !important;}html{background:transparent !important;}</style>';
+  rendered = rendered.indexOf('</head>') !== -1
+    ? rendered.replace('</head>', previewOnlyStyle + '</head>')
+    : previewOnlyStyle + rendered;
+  iframe.srcdoc = rendered;
+}
+
+function refreshPreviewIfActive() {
+  if (state.activeTab === 'preview') refreshPreview();
+}
+
+// The iframe box itself never grows to fit its document (that's only true
+// for same-origin iframes if you measure and set height yourself) — left
+// unset it defaults to the UA's ~150px replaced-element height, so the
+// rendered CV was clipped after that point. Measure the real content
+// height and push it onto the iframe element explicitly.
+function measurePreviewHeight() {
+  var scrollTop = document.querySelector('.preview-wrap').scrollTop;
+  var iframe = byId('previewFrame');
+  var doc = iframe.contentDocument;
+  if (!doc || !doc.documentElement) return;
+  // Templates commonly use `min-height: 100vh` (or `%`) so a short CV still
+  // fills the page — but vh resolves against this iframe's OWN box. Measuring
+  // scrollHeight while the iframe is already sized from a previous
+  // measurement feeds that height back into vh, which can only ever measure
+  // equal-or-larger next time — an unbounded feedback loop. Collapse the box
+  // first so vh/% floors resolve to ~0, then scrollHeight reflects only the
+  // real content height, before growing the iframe to fit it.
+  iframe.style.height = '0px';
+  var h = Math.ceil(doc.documentElement.scrollHeight);
+  // At height:0 a top-level element's own vertical margin (e.g. leadex's
+  // `.page { margin: 24px auto }`) collapses through the also-zero-height
+  // body/html and is dropped from scrollHeight, then reappears once the
+  // frame is set to a real height — clipping that same amount off the
+  // bottom. Add it back here (still measured at the collapsed pass, never
+  // by remeasuring at a real height) so it can't feed the 100vh loop above.
+  var lastEl = doc.body && doc.body.lastElementChild;
+  if (lastEl) {
+    var cs = doc.defaultView.getComputedStyle(lastEl);
+    h += Math.ceil(parseFloat(cs.marginTop) || 0) + Math.ceil(parseFloat(cs.marginBottom) || 0);
+  }
+  if (h > 0) previewNaturalHeight = h;
+  iframe.style.height = previewNaturalHeight + 'px';
+  applyZoom();
+  document.querySelector('.preview-wrap').scrollTop = scrollTop;
+}
+
+function applyZoom() {
+  var zoom = parseFloat(byId('zoomSelect').value) || 1;
+  var iframe = byId('previewFrame');
+  var outer = byId('previewFrameOuter');
+  iframe.style.transform = 'scale(' + zoom + ')';
+  // Size the outer wrapper so scaled content doesn't leave a huge gap
+  // or get clipped — based on iframe's natural (unscaled, measured) height.
+  outer.style.width = (1160 * zoom) + 'px';
+  outer.style.height = (previewNaturalHeight * zoom) + 'px';
+}
+
+/* ══════════════════════════════════════════════════
+   THEME (manual light/dark/system toggle, on top of the
+   prefers-color-scheme default)
+══════════════════════════════════════════════════ */
+
+var THEME_KEY = 'cvbuilder-theme';
+
+function getStoredTheme() {
+  var stored;
+  try { stored = localStorage.getItem(THEME_KEY); } catch (e) { stored = null; }
+  if (stored === 'light' || stored === 'dark') return stored;
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+
+function applyTheme(mode) {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+  try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+  updateThemeToggleIcon(mode);
+}
+
+function updateThemeToggleIcon(mode) {
+  var btn = byId('btnThemeToggle');
+  if (!btn) return;
+  btn.innerHTML = '';
+  btn.appendChild(icon(mode === 'dark' ? 'moon' : 'sun'));
+  btn.title = 'Theme: ' + mode + ' (click to switch to ' + (mode === 'dark' ? 'light' : 'dark') + ')';
+}
+
+function cycleTheme() {
+  applyTheme(getStoredTheme() === 'dark' ? 'light' : 'dark');
+}
+
+/* ══════════════════════════════════════════════════
+   TAB / TOPBAR WIRING
+══════════════════════════════════════════════════ */
+
+function setActiveTab(tab) {
+  state.activeTab = tab;
+  byId('view-edit').classList.toggle('hidden', tab !== 'edit');
+  byId('view-experience').classList.toggle('hidden', tab !== 'experience');
+  byId('view-preview').classList.toggle('hidden', tab !== 'preview');
+  byId('tabEdit').classList.toggle('active', tab === 'edit');
+  byId('tabExperience').classList.toggle('active', tab === 'experience');
+  byId('tabPreview').classList.toggle('active', tab === 'preview');
+  if (tab === 'preview') refreshPreview();
+  schedulePersist();
+}
+
+function populateTemplateSelect() {
+  var sel = byId('templateSelect');
+  sel.innerHTML = '';
+  Object.values(TEMPLATES).forEach(function (tpl) {
+    sel.appendChild(h('option', { value: tpl.id }, [tpl.name]));
+  });
+  sel.value = state.activeTemplateId;
+}
+
+/* ══════════════════════════════════════════════════
+   SAVE / OPEN (JSON) — plus the Save-HTML/PDF export helpers below
+══════════════════════════════════════════════════ */
+
+function sanitizeFilename(name) {
+  var base = (name || 'cv').replace(/[^a-zA-Z0-9 \-]/g, '').trim().replace(/\s+/g, '-');
+  return base || 'cv';
+}
+
+function downloadBlob(content, mime, filename) {
+  var blob = new Blob([content], { type: mime });
+  var url = URL.createObjectURL(blob);
+  var a = h('a', { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+// Reuses the exact same render() call as the live preview, which already
+// inlines cert icon SVGs as markup (not paths) — so the exported file is
+// self-contained with zero references back into resources/. Do not
+// "optimize" this into loading templates dynamically at export time.
+function exportHtml() {
+  var tpl = TEMPLATES[state.activeTemplateId] || TEMPLATES[Object.keys(TEMPLATES)[0]];
+  if (!tpl) { showStatus('No template loaded.', true); return; }
+  var html = stripEditableArtifacts(tpl.render(state.data, renderContext()));
+  var filename = sanitizeFilename(state.data.personal.fullName || 'cv') + '.html';
+  downloadBlob(html, 'text/html', filename);
+}
+
+// Fallback used when the File System Access API is unavailable, or throws
+// even though it's present (Firefox/Safari always lack it; Chromium can
+// still throw in some sandboxed/embedded contexts or under file://). No
+// real file handle exists afterward, so state.fileHandle stays null — the
+// next "Save" click behaves like Save As again, which is the correct/only
+// option without that API.
+function saveJsonFallback() {
+  downloadBlob(JSON.stringify(state.data, null, 2), 'application/json', sanitizeFilename(state.data.personal.fullName || 'cv') + '.json');
+  markSaved();
+  showStatus('Saved (downloaded as file).');
+}
+
+// Chrome auto-requests write permission inside createWritable() for
+// handles obtained this session, so this is mostly defensive belt-and-
+// braces for handle implementations that don't.
+function ensureWritePermission(handle) {
+  if (!handle || typeof handle.queryPermission !== 'function') return Promise.resolve(true);
+  var opts = { mode: 'readwrite' };
+  return handle.queryPermission(opts).then(function (perm) {
+    if (perm === 'granted') return true;
+    if (typeof handle.requestPermission !== 'function') return true;
+    return handle.requestPermission(opts).then(function (result) { return result === 'granted'; });
+  });
+}
+
+function writeJsonToHandle(handle) {
+  return ensureWritePermission(handle).then(function (ok) {
+    if (!ok) {
+      var err = new Error('Write permission denied.');
+      err.name = 'NotAllowedError';
+      throw err;
+    }
+    return handle.createWritable();
+  }).then(function (writable) {
+    return writable.write(JSON.stringify(state.data, null, 2)).then(function () {
+      return writable.close();
+    });
+  });
+}
+
+// Save: write straight to the existing handle with no dialog. Only once a
+// handle has actually been obtained (via Open or Save As) do we know FSA
+// works in this context, so a write failure here is a real I/O/permission
+// error, not an availability problem — report it rather than silently
+// falling back to a download the user didn't ask for right now.
+function saveFile() {
+  if (state.fileHandle) {
+    writeJsonToHandle(state.fileHandle).then(function () {
+      markSaved();
+      showStatus('Saved.');
+    }).catch(function (err) {
+      if (err && err.name === 'AbortError') return;
+      showStatus('Save failed: ' + (err && err.message ? err.message : 'unknown error'), true);
+    });
+  } else {
+    saveFileAs();
+  }
+}
+
+// Save As: always prompts for a location via the native picker when
+// available. Feature-detected AND wrapped in try/catch — showSaveFilePicker
+// can throw synchronously in some sandboxed/embedded contexts even when
+// the function exists (e.g. file://). AbortError (user cancelled the
+// dialog) is a silent no-op; any other picker failure falls back to a
+// plain download.
+function saveFileAs() {
+  if (typeof window.showSaveFilePicker !== 'function') { saveJsonFallback(); return; }
+
+  var pickerPromise;
+  try {
+    pickerPromise = window.showSaveFilePicker({
+      suggestedName: sanitizeFilename(state.data.personal.fullName || 'cv') + '.json',
+      types: [{ description: 'CV JSON', accept: { 'application/json': ['.json'] } }]
+    });
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    saveJsonFallback();
+    return;
+  }
+
+  pickerPromise.then(function (handle) {
+    writeJsonToHandle(handle).then(function () {
+      state.fileHandle = handle;
+      markSaved();
+      showStatus('Saved.');
+    }).catch(function (err) {
+      // A handle was obtained fine — this is a write-level failure, not an
+      // availability problem, so report it instead of also downloading.
+      showStatus('Save failed: ' + (err && err.message ? err.message : 'unknown error'), true);
+    });
+  }).catch(function (err) {
+    if (err && err.name === 'AbortError') return;
+    saveJsonFallback();
+  });
+}
+
+var PDF_LIBS_LOADED = false;
+var PDF_LIBS_LOADING = null;
+
+function loadScriptOnce(src, isReady) {
+  if (isReady()) return Promise.resolve();
+  return new Promise(function (resolve, reject) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function () { resolve(); };
+    s.onerror = function () { reject(new Error('Failed to load ' + src)); };
+    document.body.appendChild(s);
+  });
+}
+
+function loadPdfLibs() {
+  if (PDF_LIBS_LOADED) return Promise.resolve();
+  if (PDF_LIBS_LOADING) return PDF_LIBS_LOADING;
+  PDF_LIBS_LOADING = Promise.all([
+    loadScriptOnce('resources/vendor/html-pdf-exporter.js', function () { return !!window.HtmlPdfExporter; })
+  ]).then(function () { PDF_LIBS_LOADED = true; });
+  return PDF_LIBS_LOADING;
+}
+
+function exportPdf() {
+  var previewFrame = byId('previewFrame');
+  var doc = previewFrame.contentDocument;
+  var win = previewFrame.contentWindow;
+  var pageEl = doc && doc.querySelector('.page');
+  if (!pageEl) { showStatus('Preview not ready.', true); return; }
+
+  showStatus('Opening print dialog — choose "Save as PDF"…');
+
+  loadPdfLibs().then(function () {
+    var exporter = new HtmlPdfExporter({
+      root: '.page',
+      doc: doc,
+      win: win,
+
+      pageSize: 'A4',
+      pageMargin: '8mm',
+
+      scrollSelectors: ['.experience-scroll'],
+      flowSelectors: ['.experience-section', '.experience-scroll'],
+      atomicSelectors: ['.experience-scroll .item', '.project-card', '.panel', '.industry-card', '.cert-chip', '.footer-cta', '.leadex-generated-footer'],
+      keepWithNextSelectors: ['.section-title', '.item-head'],
+      // All remaining templates hand-tune .leadex-hero-contacts down to
+      // ~5.5-9px in their own @media print block to fit the thin fixed-
+      // aspect-ratio photo banner — leave it alone rather than overflow it.
+      contactSelectors: [],
+
+      preserveColors: true,
+      preserveFilters: true,
+      removeRootTransform: true,
+      avoidListItemBreaks: true,
+      expandDetails: true
+    });
+
+    return exporter.print({
+      documentTitle: sanitizeFilename(state.data.personal.fullName || 'cv')
+    });
+  }).then(function () {
+    showStatus('Print dialog closed.');
+  }).catch(function (e) {
+    showStatus('Could not open print dialog: ' + (e && e.message ? e.message : 'unknown error'), true);
+  });
+}
+
+function showStatus(msg, isErr) {
+  var existing = byId('statusMsg');
+  if (existing) existing.remove();
+  var el = h('div', { id: 'statusMsg', class: isErr ? 'err' : '' }, [msg]);
+  document.body.appendChild(el);
+  setTimeout(function () {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }, 3200);
+}
+
+// Shared baseline-reset logic for every "a CV JSON file was successfully
+// loaded" path. The File System Access Open flow and the legacy
+// <input type=file>/FileReader fallback both funnel through here so the
+// dirty/fileHandle bookkeeping can't drift between the two code paths.
+// `handle` is the FileSystemFileHandle on the FSA path, or null on the
+// fallback path (a plain <input> never yields a real handle).
+function applyOpenedJson(parsed, handle) {
+  state.data = mergeCVData(parsed);
+  persistMetricsLabels(state.data.metrics);
+  onDataChanged();
+  state.fileHandle = handle || null;
+  state.dirty = false;
+  state.everSavedOrOpened = true;
+  updateFileStatus();
+}
+
+function importJsonFile(file) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    var parsed;
+    try {
+      parsed = JSON.parse(String(reader.result));
+    } catch (e) {
+      showStatus('Import failed: invalid JSON file.', true);
+      return;
+    }
+    try {
+      applyOpenedJson(parsed, null);
+      showStatus('CV data imported successfully.');
+    } catch (e) {
+      showStatus('Import failed: ' + (e && e.message ? e.message : 'unknown error'), true);
+    }
+  };
+  reader.onerror = function () {
+    showStatus('Import failed: could not read file.', true);
+  };
+  reader.readAsText(file);
+}
+
+// Open: always tries the native picker first when available. Feature-
+// detected AND wrapped in try/catch (see saveFileAs for why). AbortError
+// (user cancelled) is a silent no-op; any other picker failure falls back
+// to clicking the hidden <input type=file>. Once a handle is in hand,
+// read/parse/merge failures are reported locally and do NOT re-trigger the
+// fallback (re-prompting with a different picker after the user already
+// chose a file would be confusing).
+function openFile() {
+  if (typeof window.showOpenFilePicker !== 'function') { byId('importFileInput').click(); return; }
+
+  var pickerPromise;
+  try {
+    pickerPromise = window.showOpenFilePicker({
+      types: [{ description: 'CV JSON', accept: { 'application/json': ['.json'] } }]
+    });
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    byId('importFileInput').click();
+    return;
+  }
+
+  pickerPromise.then(function (handles) {
+    var handle = handles[0];
+    handle.getFile().then(function (file) {
+      return file.text();
+    }).then(function (text) {
+      var parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e) {
+        showStatus('Open failed: invalid JSON file.', true);
+        return;
+      }
+      try {
+        applyOpenedJson(parsed, handle);
+        showStatus('CV data opened successfully.');
+      } catch (e) {
+        showStatus('Open failed: ' + (e && e.message ? e.message : 'unknown error'), true);
+      }
+    }).catch(function (err) {
+      showStatus('Open failed: ' + (err && err.message ? err.message : 'unknown error'), true);
+    });
+  }).catch(function (err) {
+    if (err && err.name === 'AbortError') return;
+    byId('importFileInput').click();
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER ALL (structural rebuild — add/remove/reorder/import only)
+══════════════════════════════════════════════════ */
+
+function renderAll() {
+  buildEditTab();
+  buildExperienceTab();
+  refreshPreviewIfActive();
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+
+function init() {
+  applyTheme(getStoredTheme());
+
+  loadFromStorage();
+  updateFileStatus();
+
+  populateTemplateSelect();
+  buildEditTab();
+  buildExperienceTab();
+  setActiveTab(state.activeTab);
+
+  byId('templateSelect').onchange = function () {
+    state.activeTemplateId = byId('templateSelect').value;
+    onDataChanged();
+    refreshPreviewIfActive();
+    schedulePersist();
+  };
+
+  byId('btnThemeToggle').onclick = cycleTheme;
+
+  byId('tabEdit').onclick = function () { setActiveTab('edit'); };
+  byId('tabExperience').onclick = function () { setActiveTab('experience'); };
+  byId('tabPreview').onclick = function () { setActiveTab('preview'); };
+
+  byId('btnOpen').onclick = openFile;
+  byId('importFileInput').onchange = function (ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (file) importJsonFile(file);
+    ev.target.value = '';
+  };
+
+  byId('zoomSelect').onchange = applyZoom;
+
+  var previewFrame = byId('previewFrame');
+  previewFrame.addEventListener('load', function () {
+    previewLoaded = true;
+    measurePreviewHeight();
+    var doc = previewFrame.contentDocument;
+    if (doc && doc.documentElement && window.ResizeObserver) {
+      // Fonts and the hero/footer background images finish loading after
+      // this `load` event and can shift the document height — keep
+      // watching so the frame doesn't stay clipped at the pre-image height.
+      previewResizeObserver = new ResizeObserver(function () { measurePreviewHeight(); });
+      previewResizeObserver.observe(doc.documentElement);
+    } else {
+      setTimeout(measurePreviewHeight, 300);
+      setTimeout(measurePreviewHeight, 1000);
+    }
+  });
+
+  byId('btnSaveHtml').onclick = exportHtml;
+
+  var saveMenu = byId('saveMenu');
+  var saveMenuToggle = byId('btnSaveMenuToggle');
+  saveMenuToggle.onclick = function (ev) {
+    ev.stopPropagation();
+    var willOpen = saveMenu.hasAttribute('hidden');
+    if (willOpen) saveMenu.removeAttribute('hidden'); else saveMenu.setAttribute('hidden', '');
+    saveMenuToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  };
+  byId('btnSavePdf').onclick = function () {
+    saveMenu.setAttribute('hidden', '');
+    saveMenuToggle.setAttribute('aria-expanded', 'false');
+    exportPdf();
+  };
+  document.addEventListener('click', function (ev) {
+    if (!saveMenu.hasAttribute('hidden') && !byId('saveSplitBtn').contains(ev.target)) {
+      saveMenu.setAttribute('hidden', '');
+      saveMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !saveMenu.hasAttribute('hidden')) {
+      saveMenu.setAttribute('hidden', '');
+      saveMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  byId('btnSave').onclick = saveFile;
+
+  var saveAsMenu = byId('saveAsMenu');
+  var saveAsMenuToggle = byId('btnSaveAsToggle');
+  saveAsMenuToggle.onclick = function (ev) {
+    ev.stopPropagation();
+    var willOpen = saveAsMenu.hasAttribute('hidden');
+    if (willOpen) saveAsMenu.removeAttribute('hidden'); else saveAsMenu.setAttribute('hidden', '');
+    saveAsMenuToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  };
+  byId('btnSaveAs').onclick = function () {
+    saveAsMenu.setAttribute('hidden', '');
+    saveAsMenuToggle.setAttribute('aria-expanded', 'false');
+    saveFileAs();
+  };
+  document.addEventListener('click', function (ev) {
+    if (!saveAsMenu.hasAttribute('hidden') && !byId('jsonSaveSplitBtn').contains(ev.target)) {
+      saveAsMenu.setAttribute('hidden', '');
+      saveAsMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !saveAsMenu.hasAttribute('hidden')) {
+      saveAsMenu.setAttribute('hidden', '');
+      saveAsMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+// Warn before leaving with unsaved changes (tab close, refresh, in-app nav
+// away). Most browsers ignore the custom message text and show their own
+// generic confirmation prompt instead.
+window.addEventListener('beforeunload', function (ev) {
+  if (state.dirty) {
+    ev.preventDefault();
+    ev.returnValue = '';
+  }
+});
+
+/* Kick off resource loading, then boot. This script tag sits at the end of
+ * <body>, so the DOM above is already parsed by the time this runs — no
+ * need to wait for DOMContentLoaded. */
+Promise.all([
+  loadResourceSet('resources/template/manifest.js', function () { return window.CVB && window.CVB.templateManifest; }, 'resources/template/'),
+]).then(function (results) {
+  TEMPLATES = (window.CVB && window.CVB.templates) || {};
+  var failed = results[0].failed;
+  init();
+  if (failed.length) {
+    console.warn('[cvbuilder] resource load failures:', failed);
+    showStatus('Some resources failed to load — see console.', true);
+  }
+});
+</script>
+
+<script>
+/* PWA: SW only registers on http(s)/localhost, never file:// — the .catch
+ * keeps the file:// double-click mode silent and working exactly as before. */
+var deferredInstallPrompt = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+
+window.addEventListener('beforeinstallprompt', function (ev) {
+  ev.preventDefault();
+  deferredInstallPrompt = ev;
+  byId('btnInstallApp').classList.remove('hidden');
+});
+
+window.addEventListener('appinstalled', function () {
+  deferredInstallPrompt = null;
+  byId('btnInstallApp').classList.add('hidden');
+});
+
+byId('btnInstallApp').onclick = function () {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.finally(function () { deferredInstallPrompt = null; });
+};
+</script>
+</body>
+</html>

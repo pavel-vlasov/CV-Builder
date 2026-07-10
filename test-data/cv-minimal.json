@@ -1,0 +1,60 @@
+{
+  "personal": {
+    "fullName": "Alex Johnson",
+    "roleTitle": "Junior Software Developer",
+    "specialization": "Full-Stack Development",
+    "primaryDomain": "Web Development",
+    "location": "San Francisco, CA",
+    "cityCountry": "San Francisco, USA",
+    "email": "alex.johnson@email.com",
+    "phone": "+1-415-555-0123",
+    "linkedinUrl": "https://linkedin.com/in/alexjohnson",
+    "shortProfileSummary": "Recent Computer Science graduate eager to build scalable web applications. Proficient in JavaScript, React, and Node.js.",
+    "professionalSummary": "Recent Computer Science graduate with hands-on experience in full-stack development. Passionate about writing clean, maintainable code and learning new technologies.",
+    "footerTagline": "Building the future, one line of code at a time",
+    "additionalNote": "Open to full-time opportunities and mentorship"
+  },
+  "metrics": [
+    { "label": "Years experience", "value": 0 },
+    { "label": "Projects count", "value": 1 },
+    { "label": "APIs count", "value": 0 },
+    { "label": "Certs count", "value": 0 }
+  ],
+  "skills": [
+    { "label": "JavaScript" },
+    { "label": "React" },
+    { "label": "Node.js" },
+    { "label": "HTML/CSS" }
+  ],
+  "industries": [],
+  "certifications": [],
+  "education": [
+    {
+      "title": "Bachelor of Science in Computer Science",
+      "org": "University of California, Berkeley",
+      "year": "2024"
+    }
+  ],
+  "languages": [
+    {
+      "name": "English",
+      "level": "Native"
+    }
+  ],
+  "experience": [
+    {
+      "position": "Software Development Intern",
+      "company": "TechStartup Inc.",
+      "location": "Remote",
+      "dateFrom": "June 2024",
+      "dateTo": "August 2024",
+      "achievements": [
+        { "text": "Developed and deployed three React components for the customer dashboard, improving user experience for 500+ users" },
+        { "text": "Fixed 15+ bugs identified in QA testing, reducing critical issues by 40%" },
+        { "text": "Collaborated with senior developers on code reviews and implemented best practices for component reusability" }
+      ]
+    }
+  ],
+  "projects": [],
+  "techPanels": []
+}
