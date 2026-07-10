@@ -1,0 +1,134 @@
+{
+  "personal": {
+    "fullName": "Michael Chen",
+    "roleTitle": "Backend Developer",
+    "specialization": "Microservices & API Architecture",
+    "primaryDomain": "Software Engineering",
+    "location": "San Francisco, CA",
+    "cityCountry": "San Francisco, United States",
+    "email": "michael.chen@email.com",
+    "phone": "+1 (555) 123-4567",
+    "linkedinUrl": "https://linkedin.com/in/michaelchen",
+    "shortProfileSummary": "Experienced backend developer specializing in building scalable microservices and robust API architectures.",
+    "professionalSummary": "Backend developer with 5 years of experience designing and implementing scalable microservices for high-traffic applications. Proficient in cloud infrastructure, database optimization, and API development. Demonstrated success in leading technical initiatives that improved system performance by 40% and reduced operational costs. Passionate about clean code, system design, and mentoring junior developers.",
+    "footerTagline": "Building resilient systems at scale",
+    "additionalNote": "Available for contract and full-time opportunities"
+  },
+  "metrics": [
+    { "label": "Years experience", "value": 5 },
+    { "label": "Projects count", "value": 3 },
+    { "label": "APIs count", "value": 8 },
+    { "label": "Certs count", "value": 2 }
+  ],
+  "skills": [
+    { "label": "Java" },
+    { "label": "Python" },
+    { "label": "Spring Boot" },
+    { "label": "Docker" },
+    { "label": "Kubernetes" },
+    { "label": "PostgreSQL" },
+    { "label": "Redis" },
+    { "label": "AWS" },
+    { "label": "REST APIs" },
+    { "label": "Message Queues" },
+    { "label": "Git" }
+  ],
+  "industries": [
+    {
+      "title": "Financial Technology",
+      "description": "Built payment processing systems and trading platforms for fintech companies"
+    },
+    {
+      "title": "E-Commerce",
+      "description": "Developed backend services for high-traffic e-commerce platforms handling millions of transactions"
+    }
+  ],
+  "certifications": [
+    {
+      "title": "AWS Certified Solutions Architect - Associate"
+    },
+    {
+      "title": "Docker Certified Associate"
+    }
+  ],
+  "education": [
+    {
+      "title": "Bachelor of Science in Computer Science",
+      "org": "University of California, Berkeley",
+      "year": "2019"
+    }
+  ],
+  "languages": [
+    {
+      "name": "English",
+      "level": "Native"
+    },
+    {
+      "name": "Mandarin Chinese",
+      "level": "Fluent"
+    }
+  ],
+  "experience": [
+    {
+      "position": "Senior Backend Engineer",
+      "company": "TechCorp Solutions",
+      "location": "San Francisco, CA",
+      "dateFrom": "2024-03",
+      "dateTo": "Present",
+      "achievements": [
+        { "text": "Led redesign of payment processing microservices, reducing latency by 35% and increasing throughput to 10K req/s" },
+        { "text": "Mentored team of 3 junior developers on system design patterns and code quality best practices" },
+        { "text": "Implemented automated deployment pipeline reducing release time from 4 hours to 15 minutes" }
+      ]
+    },
+    {
+      "position": "Backend Developer",
+      "company": "CloudScale Inc",
+      "location": "San Jose, CA",
+      "dateFrom": "2022-06",
+      "dateTo": "2024-02",
+      "achievements": [
+        { "text": "Developed and maintained 5 core microservices handling 50M+ daily requests across AWS infrastructure" },
+        { "text": "Optimized database queries and implemented Redis caching, improving API response time by 40%" },
+        { "text": "Designed Kubernetes deployment strategy for containerized services, improving system reliability to 99.95% uptime" }
+      ]
+    },
+    {
+      "position": "Junior Backend Developer",
+      "company": "StartupXYZ",
+      "location": "San Francisco, CA",
+      "dateFrom": "2021-01",
+      "dateTo": "2022-05",
+      "achievements": [
+        { "text": "Built RESTful APIs using Spring Boot for customer management and billing systems" },
+        { "text": "Implemented automated testing suite achieving 75% code coverage and reducing production bugs by 30%" }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Real-time Analytics Dashboard",
+      "description": "Developed backend service processing real-time event streams and providing REST APIs for analytics dashboard visualization"
+    },
+    {
+      "name": "Distributed Cache Layer",
+      "description": "Implemented distributed caching system using Redis Cluster reducing database load by 60% across microservices"
+    },
+    {
+      "name": "API Gateway Service",
+      "description": "Built API gateway with rate limiting, authentication, and request routing for 20+ internal services"
+    }
+  ],
+  "techPanels": [
+    {
+      "title": "Core Competencies",
+      "bullets": [
+        { "text": "Microservices architecture and distributed systems design" },
+        { "text": "Cloud infrastructure (AWS EC2, S3, RDS, Lambda) and containerization" },
+        { "text": "RESTful API design, testing, and documentation" },
+        { "text": "Database optimization and performance tuning" },
+        { "text": "CI/CD pipelines and automated deployment" }
+      ]
+    }
+  ]
+}
