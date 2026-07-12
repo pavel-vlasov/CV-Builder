@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{FULL_NAME}} — CV</title>
+  <meta name="description" content="Minimal editorial CV template" />
+  <style>
+    :root {
+      --paper: #ffffff;
+      --canvas: #ebeae6;
+      --ink: #111111;
+      --muted: #5d5d5d;
+      --faint: #8a8a8a;
+      --rule: #b9b9b9;
+      --rule-soft: #dddddd;
+      --page-width: 1120px;
+      --page-pad-x: 74px;
+      --page-pad-y: 66px;
+      --sidebar: 244px;
+      --gap: 42px;
+      --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 0;
+      background: var(--canvas);
+      color: var(--ink);
+    }
+
+    .page {
+      width: var(--page-width);
+      min-height: 1584px;
+      margin: 0 auto;
+      padding: var(--page-pad-y) var(--page-pad-x) 52px;
+      background: var(--paper);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
+    }
+
+    .cv-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 286px;
+      gap: 46px;
+      align-items: start;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .identity { min-width: 0; }
+
+    .name {
+      max-width: 520px;
+      margin: -5px 0 18px;
+      color: var(--ink);
+      font-size: 55px;
+      font-weight: 500;
+      line-height: 1.09;
+      letter-spacing: 0.235em;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+
+    .role {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+    }
+
+    .identity-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 14px;
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .identity-meta span:not(:empty) + span:not(:empty)::before {
+      content: "·";
+      margin-right: 14px;
+      color: var(--faint);
+    }
+
+    .contacts {
+      display: grid;
+      gap: 9px;
+      margin: 4px 0 0;
+      font-style: normal;
+    }
+
+    .contact-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 23px;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .contact-value {
+      overflow-wrap: anywhere;
+    }
+
+    .contact-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: #ffffff;
+    }
+
+    .contact-icon svg {
+      display: block;
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .section-title {
+      margin: 0 0 17px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: 0.31em;
+      text-transform: uppercase;
+    }
+
+    .summary {
+      padding-bottom: 27px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .summary p {
+      margin: 0;
+      color: #353535;
+      font-size: 13px;
+      line-height: 1.72;
+    }
+
+    .summary p + p { margin-top: 10px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0;
+      margin: 0;
+      padding: 19px 0 18px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 0 20px;
+      border-left: 1px solid var(--rule-soft);
+      text-align: center;
+    }
+
+    .metric:first-child { border-left: 0; padding-left: 0; }
+    .metric:last-child { padding-right: 0; }
+
+    .metric-value {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 23px;
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-label {
+      display: block;
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.35;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      gap: var(--gap);
+      margin-top: 31px;
+      align-items: start;
+    }
+
+    .sidebar {
+      min-width: 0;
+      padding-right: 34px;
+      border-right: 1px solid var(--rule);
+    }
+
+    .main-column { min-width: 0; }
+
+    .sidebar-section,
+    .main-section {
+      break-inside: auto;
+    }
+
+    .sidebar-section + .sidebar-section,
+    .main-section + .main-section {
+      margin-top: 35px;
+      padding-top: 31px;
+      border-top: 1px solid var(--rule-soft);
+    }
+
+    .sidebar .section-title,
+    .main-column .section-title {
+      margin-bottom: 18px;
+    }
+
+    .education-list,
+    .language-list,
+    .certification-list,
+    .industry-list,
+    .skill-list,
+    .experience-list,
+    .project-list,
+    .tech-panel-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .education-item,
+    .language-item,
+    .certification-item,
+    .industry-item {
+      margin: 0 0 17px;
+      break-inside: avoid;
+    }
+
+    .education-item:last-child,
+    .language-item:last-child,
+    .certification-item:last-child,
+    .industry-item:last-child { margin-bottom: 0; }
+
+    .compact-line {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.52;
+    }
+
+    .education-item .compact-line {
+      color: var(--ink);
+      font-size: 10.5px;
+      line-height: 1.55;
+      text-transform: uppercase;
+    }
+
+    .skill-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .skill-item,
+    .certification-item,
+    .language-item {
+      position: relative;
+      padding-left: 11px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .skill-item::before,
+    .certification-item::before,
+    .language-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.63em;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+
+    .industry-item {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .industry-monogram {
+      display: grid;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .industry-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: 10.5px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .industry-description {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.47;
+    }
+
+    .experience-item,
+    .project-item,
+    .tech-panel {
+      break-inside: avoid;
+    }
+
+    .experience-item + .experience-item,
+    .project-item + .project-item,
+    .tech-panel + .tech-panel {
+      margin-top: 24px;
+    }
+
+    .item-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: baseline;
+    }
+
+    .item-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: 0.055em;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+
+    .item-dates {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .date-from:not(:empty)::after { content: " — "; }
+
+    .company-line {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.45;
+    }
+
+    .achievement-list,
+    .tech-bullet-list {
+      margin: 10px 0 0;
+      padding: 0 0 0 20px;
+      color: #353535;
+      font-size: 11px;
+      line-height: 1.56;
+    }
+
+    .achievement-list li,
+    .tech-bullet-list li {
+      margin: 3px 0;
+      padding-left: 4px;
+    }
+
+    .project-description {
+      margin: 7px 0 0;
+      color: #353535;
+      font-size: 11px;
+      line-height: 1.58;
+    }
+
+    .tech-panel {
+      padding-left: 16px;
+      border-left: 2px solid var(--ink);
+    }
+
+    .additional-note {
+      margin-top: 32px;
+      padding: 17px 19px;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+
+    .cv-footer {
+      margin-top: 42px;
+      padding-top: 15px;
+      border-top: 1px solid var(--ink);
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.45;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 0; }
+      .page {
+        width: 100%;
+        min-height: 0;
+        padding: 44px 28px;
+        box-shadow: none;
+      }
+      .cv-header { grid-template-columns: 1fr; gap: 28px; }
+      .contacts { max-width: 420px; }
+      .contact-row { grid-template-columns: 23px minmax(0, 1fr); text-align: left; }
+      .contact-icon { grid-column: 1; grid-row: 1; }
+      .contact-value { grid-column: 2; grid-row: 1; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; }
+      .metric:nth-child(odd) { border-left: 0; }
+      .metric:nth-child(even) { border-left: 1px solid var(--rule-soft); }
+      .content-grid { grid-template-columns: 1fr; }
+      .sidebar { padding-right: 0; border-right: 0; }
+      .main-column { padding-top: 30px; border-top: 1px solid var(--rule); }
+      .name { font-size: clamp(34px, 9vw, 55px); }
+    }
+
+    @media print {
+      @page { size: A4; margin: 0; }
+      html, body { background: #ffffff !important; }
+      body { padding: 0; }
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 13mm 14mm 11mm;
+        box-shadow: none;
+        overflow: visible;
+      }
+      .cv-header { grid-template-columns: minmax(0, 1fr) 50mm; gap: 8mm; padding-bottom: 6mm; }
+      .name { max-width: 96mm; margin-bottom: 4mm; font-size: 12.5mm; }
+      .role { font-size: 2.8mm; }
+      .identity-meta { font-size: 2.25mm; }
+      .contacts { gap: 1.5mm; }
+      .contact-row { grid-template-columns: minmax(0, 1fr) 4.5mm; gap: 2mm; font-size: 2.2mm; }
+      .contact-icon { width: 4mm; height: 4mm; }
+      .contact-icon svg { width: 2.2mm; height: 2.2mm; }
+      .section { margin-top: 6mm; }
+      .section-title { margin-bottom: 3mm; font-size: 2.6mm; }
+      .summary { padding-bottom: 5mm; }
+      .summary p { font-size: 2.65mm; line-height: 1.58; }
+      .metrics { padding: 4mm 0; }
+      .metric-value { font-size: 5mm; }
+      .metric-label { font-size: 1.9mm; }
+      .content-grid { grid-template-columns: 43mm minmax(0, 1fr); gap: 8mm; margin-top: 6mm; }
+      .sidebar { padding-right: 6mm; }
+      .sidebar-section + .sidebar-section,
+      .main-section + .main-section { margin-top: 6mm; padding-top: 5mm; }
+      .compact-line,
+      .skill-item,
+      .certification-item,
+      .language-item,
+      .industry-description,
+      .company-line,
+      .achievement-list,
+      .project-description,
+      .tech-bullet-list { font-size: 2.2mm; }
+      .education-item .compact-line,
+      .industry-title,
+      .item-title { font-size: 2.25mm; }
+      .item-dates { font-size: 2mm; }
+      .experience-item + .experience-item,
+      .project-item + .project-item,
+      .tech-panel + .tech-panel { margin-top: 4mm; }
+      .additional-note { margin-top: 6mm; padding: 3mm 4mm; font-size: 2.1mm; }
+      .cv-footer { margin-top: 7mm; padding-top: 3mm; font-size: 1.8mm; }
+      .experience-item,
+      .project-item,
+      .tech-panel,
+      .education-item,
+      .industry-item { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="cv-header">
+      <div class="identity">
+        <h1 class="name">{{FULL_NAME}}</h1>
+        <p class="role">{{ROLE_TITLE}}</p>
+        <div class="identity-meta">
+          <span>{{SPECIALIZATION}}</span>
+          <span>{{PRIMARY_DOMAIN}}</span>
+          <span>{{LOCATION}}</span>
+        </div>
+      </div>
+
+      <address class="contacts">
+        <!--CVB:section phone-->
+        <div class="contact-row">
+          <span class="contact-value">{{PHONE}}</span>
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-3 2c1.4 2.8 3.6 5 6.4 6.4l2-3 5 2v4c0 1.1-.9 2-2 2C10.3 22.4 1.6 13.7 2 4.6 2 3.7 2.9 3 4 3h1z"/></svg>
+          </span>
+        </div>
+        <!--CVB:endsection phone-->
+
+        <!--CVB:section email-->
+        <div class="contact-row">
+          <span class="contact-value">{{EMAIL}}</span>
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+          </span>
+        </div>
+        <!--CVB:endsection email-->
+
+        <!--CVB:section cityCountry-->
+        <div class="contact-row">
+          <span class="contact-value">{{CITY_COUNTRY}}</span>
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg>
+          </span>
+        </div>
+        <!--CVB:endsection cityCountry-->
+
+        <!--CVB:section linkedin-->
+        <div class="contact-row">
+          <span class="contact-value">{{LINKEDIN_URL}}</span>
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 9v10M7 5.5v.1M11 19v-6a4 4 0 0 1 8 0v6M11 9v10"/></svg>
+          </span>
+        </div>
+        <!--CVB:endsection linkedin-->
+      </address>
+    </header>
+
+    <!--CVB:section summary-->
+    <section class="section summary">
+      <h2 class="section-title">Summary</h2>
+      <p>{{SHORT_PROFILE_SUMMARY}}</p>
+      <!--CVB:section professionalSummary-->
+      <p>{{PROFESSIONAL_SUMMARY}}</p>
+      <!--CVB:endsection professionalSummary-->
+    </section>
+    <!--CVB:endsection summary-->
+
+    <!--CVB:section metrics-->
+    <section class="metrics" aria-label="Career metrics">
+      <!--CVB:repeat metrics-->
+      <div class="metric">
+        <strong class="metric-value">{{VALUE}}</strong>
+        <span class="metric-label">{{LABEL}}</span>
+      </div>
+      <!--CVB:endrepeat metrics-->
+    </section>
+    <!--CVB:endsection metrics-->
+
+    <div class="content-grid">
+      <aside class="sidebar">
+        <!--CVB:section education-->
+        <section class="sidebar-section">
+          <h2 class="section-title">Education</h2>
+          <ul class="education-list">
+            <!--CVB:repeat education-->
+            <li class="education-item"><div class="compact-line">{{LINE}}</div></li>
+            <!--CVB:endrepeat education-->
+          </ul>
+        </section>
+        <!--CVB:endsection education-->
+
+        <!--CVB:section skills-->
+        <section class="sidebar-section">
+          <h2 class="section-title">Skills</h2>
+          <ul class="skill-list">
+            <!--CVB:repeat skills-->
+            <li class="skill-item">{{LABEL}}</li>
+            <!--CVB:endrepeat skills-->
+          </ul>
+        </section>
+        <!--CVB:endsection skills-->
+
+        <!--CVB:section certifications-->
+        <section class="sidebar-section">
+          <h2 class="section-title">Certifications</h2>
+          <ul class="certification-list">
+            <!--CVB:repeat certifications-->
+            <li class="certification-item">{{TITLE}}</li>
+            <!--CVB:endrepeat certifications-->
+          </ul>
+        </section>
+        <!--CVB:endsection certifications-->
+
+        <!--CVB:section languages-->
+        <section class="sidebar-section">
+          <h2 class="section-title">Languages</h2>
+          <ul class="language-list">
+            <!--CVB:repeat languages-->
+            <li class="language-item">{{LINE}}</li>
+            <!--CVB:endrepeat languages-->
+          </ul>
+        </section>
+        <!--CVB:endsection languages-->
+
+        <!--CVB:section industries-->
+        <section class="sidebar-section">
+          <h2 class="section-title">Industries</h2>
+          <ul class="industry-list">
+            <!--CVB:repeat industries-->
+            <li class="industry-item">
+              <span class="industry-monogram">{{MEDIA}}</span>
+              <div>
+                <h3 class="industry-title">{{TITLE}}</h3>
+                <!--CVB:section industryDesc-->
+                <p class="industry-description">{{DESCRIPTION}}</p>
+                <!--CVB:endsection industryDesc-->
+              </div>
+            </li>
+            <!--CVB:endrepeat industries-->
+          </ul>
+        </section>
+        <!--CVB:endsection industries-->
+      </aside>
+
+      <div class="main-column">
+        <!--CVB:section experience-->
+        <section class="main-section experience-section">
+          <h2 class="section-title">Work Experience</h2>
+          <div class="experience-list experience-scroll">
+            <!--CVB:repeat experience-->
+            <article class="experience-item item">
+              <div class="item-head">
+                <h3 class="item-title">{{POSITION}}</h3>
+                <div class="item-dates"><span class="date-from">{{DATE_FROM}}</span><span class="date-to">{{DATE_TO}}</span></div>
+              </div>
+              <!--CVB:section experienceCompany-->
+              <div class="company-line">{{COMPANY_LINE}}</div>
+              <!--CVB:endsection experienceCompany-->
+              <ul class="achievement-list">
+                <!--CVB:repeat achievements-->
+                <li>{{TEXT}}</li>
+                <!--CVB:endrepeat achievements-->
+              </ul>
+            </article>
+            <!--CVB:endrepeat experience-->
+          </div>
+        </section>
+        <!--CVB:endsection experience-->
+
+        <!--CVB:section projects-->
+        <section class="main-section">
+          <h2 class="section-title">Selected Projects</h2>
+          <div class="project-list">
+            <!--CVB:repeat projects-->
+            <article class="project-item project-card">
+              <div class="item-head"><h3 class="item-title">{{NAME}}</h3></div>
+              <!--CVB:section projectDesc-->
+              <p class="project-description">{{DESCRIPTION}}</p>
+              <!--CVB:endsection projectDesc-->
+            </article>
+            <!--CVB:endrepeat projects-->
+          </div>
+        </section>
+        <!--CVB:endsection projects-->
+
+        <!--CVB:section techPanels-->
+        <section class="main-section">
+          <h2 class="section-title">Technical Expertise</h2>
+          <div class="tech-panel-list">
+            <!--CVB:repeat techPanels-->
+            <article class="tech-panel panel">
+              <h3 class="item-title">{{TITLE}}</h3>
+              <ul class="tech-bullet-list">
+                <!--CVB:repeat techBullets-->
+                <li>{{TEXT}}</li>
+                <!--CVB:endrepeat techBullets-->
+              </ul>
+            </article>
+            <!--CVB:endrepeat techPanels-->
+          </div>
+        </section>
+        <!--CVB:endsection techPanels-->
+
+        <!--CVB:section additionalNote-->
+        <div class="additional-note">{{ADDITIONAL_NOTE}}</div>
+        <!--CVB:endsection additionalNote-->
+      </div>
+    </div>
+
+    <!--CVB:section footerTagline-->
+    <footer class="cv-footer">{{FOOTER_TAGLINE}}</footer>
+    <!--CVB:endsection footerTagline-->
+  </main>
+</body>
+</html>

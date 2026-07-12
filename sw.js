@@ -9,7 +9,7 @@
 // resources/template/manifest.js: nothing can list a folder from
 // service-worker code. Adding a template there also means adding its
 // file here.
-const CACHE_NAME = 'cvb-cache-v1';
+const CACHE_NAME = 'cvb-cache-v2';
 
 const PRECACHE_URLS = [
   './',
@@ -19,6 +19,12 @@ const PRECACHE_URLS = [
   'resources/template/leadex-ops-dashboard.template.js',
   'resources/template/leadex-market-analytics.template.js',
   'resources/template/leadex-cloud-native.template.js',
+  'resources/template/minimalist-editorial.template.js',
+  'resources/template/leadex-american-notebook.template.js',
+  'resources/template/leadex-integration-partner.template.js',
+  'resources/template/leadex-vintage-comic.template.js',
+  'resources/template/leadex-paper-resume.template.js',
+  'resources/template/leadex-minimal-editorial.template.js',
   'resources/vendor/html-pdf-exporter.js',
   'resources/icons/icon-192.png',
   'resources/icons/icon-512.png',
@@ -31,8 +37,11 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function (cache) { return cache.addAll(PRECACHE_URLS); })
-      .then(function () { return self.skipWaiting(); })
   );
+});
+
+self.addEventListener('message', function (event) {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', function (event) {
