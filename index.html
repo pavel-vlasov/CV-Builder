@@ -247,6 +247,7 @@ body { height: 100vh; overflow: hidden; }
   align-items: start;
 }
 .card-wide { grid-column: 1 / -1; }
+.card-stack { display: flex; flex-direction: column; gap: 16px; }
 .card {
   background: var(--bg);
   border: 0.5px solid var(--border);
@@ -500,7 +501,7 @@ body { height: 100vh; overflow: hidden; }
         <div class="nav-group-label">Main</div>
         <button class="nav-item active" data-view="edit" data-target="mainInfoCard">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c1.3-3.6 4-5.4 7-5.4s5.7 1.8 7 5.4"></path></svg>
-          <span class="nav-item-label">Personal Info</span>
+          <span class="nav-item-label">Dashboard</span>
         </button>
       </div>
 
@@ -520,7 +521,7 @@ body { height: 100vh; overflow: hidden; }
         <div class="nav-group-label">Projects &amp; Education</div>
         <button class="nav-item" data-view="edit" data-target="projectsEducationCard" data-list-key="projects">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6z"></path></svg>
-          <span class="nav-item-label">Projects</span>
+          <span class="nav-item-label">Selected Projects</span>
           <span class="nav-count" id="navCountProjects">0</span>
         </button>
         <button class="nav-item" data-view="edit" data-target="projectsEducationCard" data-list-key="education">
@@ -560,10 +561,6 @@ body { height: 100vh; overflow: hidden; }
 
       <div class="nav-group">
         <div class="nav-group-label">Content</div>
-        <button class="nav-item" data-view="edit" data-target="summaryCard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"></path><path d="M14 3v4h4"></path><path d="M9 13h6M9 17h6"></path></svg>
-          <span class="nav-item-label">Summary</span>
-        </button>
         <button class="nav-item" data-view="preview">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           <span class="nav-item-label">Preview</span>
@@ -1273,12 +1270,14 @@ function buildEditTab() {
   var grid = h('div', { class: 'form-grid' }, [
     buildPersonalMainCard(),
     buildPersonalContactsCard(),
-    buildPersonalAdditionalCard(),
+    h('div', { class: 'card-stack' }, [
+      buildProjectsEducationCard(),
+      buildAdditionalListsCard(),
+      buildMetricsCard(),
+    ]),
     buildSkillsCard(),
-    buildMetricsCard(),
-    buildProjectsEducationCard(),
-    buildAdditionalListsCard(),
     buildPersonalSummaryCard(),
+    buildPersonalAdditionalCard(),
   ]);
   root.appendChild(grid);
 }
@@ -1294,7 +1293,7 @@ function buildPersonalMainCard() {
     ['primaryDomain', 'Primary domain', 'text'],
     ['location', 'Location', 'text'],
   ];
-  var card = h('div', { class: 'card', id: 'mainInfoCard' }, [h('h2', {}, ['Personal — Main info'])]);
+  var card = h('div', { class: 'card', id: 'mainInfoCard' }, [h('h2', {}, ['Personal Main info'])]);
 
   fields.forEach(function (f) {
     var key = f[0], label = f[1];
@@ -1308,7 +1307,7 @@ function buildPersonalMainCard() {
 
 function buildPersonalSummaryCard() {
   var p = state.data.personal;
-  var card = h('div', { class: 'card card-wide', id: 'summaryCard' }, [h('h2', {}, ['Personal — Summary'])]);
+  var card = h('div', { class: 'card card-wide', id: 'summaryCard' }, [h('h2', {}, ['Personal Summary'])]);
   var cols = h('div', { class: 'summary-cols' });
 
   [['shortProfileSummary', 'Short profile summary'], ['professionalSummary', 'Professional summary']].forEach(function (f) {
@@ -1331,7 +1330,7 @@ function buildPersonalContactsCard() {
     ['linkedinUrl', 'LinkedIn URL', 'text'],
     ['cityCountry', 'City / Country', 'text'],
   ];
-  var card = h('div', { class: 'card', id: 'contactsCard' }, [h('h2', {}, ['Personal — Contacts'])]);
+  var card = h('div', { class: 'card', id: 'contactsCard' }, [h('h2', {}, ['Personal Contacts'])]);
 
   fields.forEach(function (f) {
     var key = f[0], label = f[1];
@@ -1349,15 +1348,17 @@ function buildPersonalAdditionalCard() {
     ['footerTagline', 'Footer tagline', 'text'],
     ['additionalNote', 'Additional note', 'text'],
   ];
-  var card = h('div', { class: 'card', id: 'additionalInfoCard' }, [h('h2', {}, ['Personal — Additional info'])]);
+  var card = h('div', { class: 'card card-wide', id: 'additionalInfoCard' }, [h('h2', {}, ['Additional info'])]);
+  var cols = h('div', { class: 'summary-cols' });
 
   fields.forEach(function (f) {
     var key = f[0], label = f[1];
     var input = h('input', { class: 'input', type: 'text', value: p[key] || '' });
     input.oninput = function () { state.data.personal[key] = input.value; onScalarChanged(); };
-    card.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), input]));
+    cols.appendChild(h('div', { class: 'field' }, [h('label', {}, [label]), input]));
   });
 
+  card.appendChild(cols);
   return card;
 }
 
@@ -1517,7 +1518,7 @@ function openSkillsModal() {
 
 var LIST_DEFS = [
     {
-      listKey: 'projects', title: 'Projects', addLabel: 'Add project',
+      listKey: 'projects', title: 'Selected Projects', addLabel: 'Add project',
       openItemModal: function (item, onSave) {
         var FIELD_DEFS = [
           { key: 'name', label: 'Name', type: 'text' },
@@ -1693,7 +1694,7 @@ function openListModal(opts) {
 }
 
 function buildListsPanelCard(cardId, titleText, listKeys) {
-  var card = h('div', { class: 'card card-wide', id: cardId }, [h('h2', {}, [titleText])]);
+  var card = h('div', { class: 'card', id: cardId }, [h('h2', {}, [titleText])]);
   var row = h('div', { class: 'list-btn-row' });
   LIST_DEFS.filter(function (opts) { return listKeys.indexOf(opts.listKey) !== -1; }).forEach(function (opts) {
     var count = state.data[opts.listKey].length;

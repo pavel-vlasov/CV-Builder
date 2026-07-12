@@ -66,6 +66,14 @@
           var(--red-rule) 63px,
           var(--red-rule) 65px,
           transparent 65px,
+          transparent 917px,
+          rgba(40, 44, 78, .28) 917px,
+          rgba(40, 44, 78, .28) 918px,
+          transparent 918px,
+          transparent 921px,
+          rgba(44, 47, 88, .78) 921px,
+          rgba(44, 47, 88, .78) 924px,
+          transparent 924px,
           transparent 100%),
         repeating-linear-gradient(
           to bottom,
@@ -108,16 +116,15 @@
     }
 
     .topline {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 276px;
-      gap: 28px;
-      align-items: end;
+      position: relative;
       min-height: 54px;
       border-bottom: 2px solid rgba(165, 79, 85, .44);
     }
+    .topline::after { content: ""; display: block; clear: both; overflow: hidden; }
 
 
     .document-brand {
+      float: left;
       margin: 0 0 3px;
       min-height: 54px;
       display: inline-flex;
@@ -125,8 +132,8 @@
       align-items: flex-start;
       justify-content: flex-end;
       line-height: .74;
-      color: #1c63b7;
-      font-family: "Arial Black", "Arial Narrow", "Segoe UI", Arial, sans-serif;
+      color: var(--blue-ink);
+      font-family: var(--hand);
       font-style: normal;
       text-decoration: none;
       transform: translateY(1px);
@@ -136,34 +143,30 @@
       display: block;
       white-space: nowrap;
       font-size: 31px;
-      font-weight: 800;
-      letter-spacing: -.07em;
-      background: linear-gradient(90deg, #00adee 0%, #1d67ba 56%, #2b3d99 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 .01px rgba(0, 78, 170, .1);
+      font-weight: 700;
+      color: var(--blue-ink);
     }
 
     .brand-systems {
       margin-top: 5px;
       font-size: 34px;
-      letter-spacing: -.075em;
     }
 
     .brand-tagline {
       display: block;
       margin-top: 8px;
       padding-left: 72px;
-      color: #2b3d99;
+      color: var(--blue-ink);
       font-size: 7.5px;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1;
       letter-spacing: .22em;
       white-space: nowrap;
     }
 
     .comments-heading {
+      float: right;
+      width: 193px;
       margin: 0 0 4px;
       color: var(--blue-ink);
       font-size: 17px;
@@ -172,36 +175,10 @@
       transform: rotate(-1deg);
     }
 
-    .resume-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 276px;
-      gap: 28px;
-      align-items: start;
-    }
-
     .main-column {
       min-width: 0;
       padding-top: 13px;
-    }
-
-    .comments-column {
-      position: relative;
-      min-width: 0;
-      align-self: stretch;
-      min-height: 1220px;
-      padding: 14px 6px 20px 24px;
-      color: var(--blue-ink);
-      border-left: 3px solid rgba(44, 47, 88, .78);
-    }
-
-    .comments-column::before {
-      content: "";
-      position: absolute;
-      left: -4px;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background: rgba(40, 44, 78, .28);
+      padding-right: 221px;
     }
 
     .identity {
@@ -225,18 +202,21 @@
     }
 
     .domain-line {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 11px;
       color: var(--ink-soft);
       font-size: 15px;
+    }
+
+    .domain-line span,
+    .contact-row span,
+    .location-row span {
+      display: inline;
     }
 
     .domain-line span:not(:empty) + span:not(:empty)::before,
     .contact-row span:not(:empty) + span:not(:empty)::before,
     .location-row span:not(:empty) + span:not(:empty)::before {
       content: "·";
-      margin-right: 11px;
+      margin: 0 11px;
       color: rgba(35, 34, 41, .55);
     }
 
@@ -255,23 +235,16 @@
       line-height: 1.7;
     }
 
-    .contact-row,
-    .location-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0 0;
-    }
-
     .section {
       position: relative;
-      display: grid;
-      grid-template-columns: 188px minmax(0, 1fr);
-      gap: 14px;
       margin: 8px 0 14px;
       break-inside: auto;
     }
+    .section::after { content: ""; display: block; clear: both; overflow: hidden; }
 
     .section-title {
+      float: left;
+      width: 188px;
       margin: 0;
       padding-top: 1px;
       font-size: 25px;
@@ -282,6 +255,7 @@
     }
 
     .section-body {
+      margin-left: 202px;
       min-width: 0;
     }
 
@@ -310,26 +284,26 @@
     }
 
     .metrics-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 4px 22px;
+      overflow: hidden;
     }
+    .metrics-list::after { content: ""; display: block; clear: both; overflow: hidden; }
 
     .metric-item {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: baseline;
+      float: left;
+      width: calc(50% - 11px);
+      margin: 2px 0;
+      overflow: hidden;
       min-width: 0;
     }
+    .metric-item:nth-child(odd) { margin-right: 22px; }
 
     .metric-label { color: var(--ink-soft); }
-    .metric-value { font-size: 20px; font-weight: 700; white-space: nowrap; }
+    .metric-value { float: right; margin-left: 10px; font-size: 20px; font-weight: 700; white-space: nowrap; }
 
-    .skill-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 14px;
+    .skill-item {
+      display: inline;
+      margin-right: 14px;
+      line-height: 2;
     }
 
     .skill-item::before {
@@ -338,19 +312,26 @@
     }
 
     .industry-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px 20px;
+      overflow: hidden;
     }
+    .industry-list::after { content: ""; display: block; clear: both; overflow: hidden; }
 
     .industry-item {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
-      gap: 8px;
+      float: left;
+      width: calc(50% - 10px);
+      margin: 0 0 8px;
       break-inside: avoid;
+    }
+    .industry-item:nth-child(odd) { margin-right: 20px; }
+    .industry-item::after { content: ""; display: block; clear: both; overflow: hidden; }
+
+    .industry-item > div {
+      overflow: hidden;
     }
 
     .industry-letter {
+      float: left;
+      margin-right: 8px;
       display: inline-flex;
       width: 30px;
       height: 30px;
@@ -361,7 +342,6 @@
       font-size: 16px;
       font-weight: 700;
       transform: rotate(-3deg);
-      align-self: start;
       line-height: 1;
     }
 
@@ -370,8 +350,7 @@
 
     .simple-list li,
     .project-item,
-    .tech-panel,
-    .experience-item {
+    .tech-panel {
       break-inside: avoid;
     }
 
@@ -421,16 +400,21 @@
 
     .experience-item {
       position: relative;
-      display: grid;
-      grid-template-columns: 142px minmax(0, 1fr);
-      gap: 13px;
       margin: 0 0 14px;
     }
+    .experience-item::after { content: ""; display: block; clear: both; overflow: hidden; }
 
     .experience-date {
+      float: left;
+      width: 142px;
       padding-top: 1px;
       font-size: 15px;
       line-height: 1.45;
+    }
+
+    .experience-content {
+      margin-left: 155px;
+      min-width: 0;
     }
 
     .experience-company {
@@ -479,23 +463,23 @@
     .footer {
       position: relative;
       z-index: 1;
-      display: grid;
-      grid-template-columns: 188px minmax(0, 1fr) 276px;
-      gap: 14px;
-      align-items: start;
       margin-top: 20px;
       padding-top: 8px;
       border-top: 2px solid rgba(165, 79, 85, .36);
       break-inside: avoid;
     }
+    .footer::after { content: ""; display: block; clear: both; overflow: hidden; }
 
     .footer-label {
+      float: left;
+      width: 188px;
       margin: 0;
       font-size: 24px;
       font-weight: 600;
     }
 
     .footer-copy {
+      margin-left: 202px;
       min-width: 0;
       font-size: 16px;
       line-height: 1.55;
@@ -504,31 +488,11 @@
     .footer-tagline { margin: 0; font-weight: 700; }
     .additional-note { margin: 2px 0 0; color: var(--ink-soft); white-space: pre-line; }
 
-    .footer-comment {
-      position: relative;
-      margin: 0;
-      padding-left: 24px;
-      color: var(--blue-ink);
-      border-left: 3px solid rgba(44, 47, 88, .78);
-      font-size: 17px;
-      line-height: 1.6;
-      font-weight: 600;
-    }
-
     .footer:has(.footer-tagline:empty):has(.additional-note:empty) { display: none; }
-
-    .footer-comment::before {
-      content: "";
-      position: absolute;
-      left: -35px;
-      top: 15px;
-      width: 28px;
-      border-top: 3px solid currentColor;
-    }
 
     .empty-safe:empty { display: none; }
 
-    @media (max-width: 900px) {
+    @media screen and (max-width: 900px) {
       body { font-size: 15px; }
       .page {
         width: 100%;
@@ -542,27 +506,38 @@
           repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--rule) 31px, var(--rule) 32px),
           linear-gradient(135deg, var(--paper-light), var(--paper));
       }
-      .topline,
-      .resume-grid { grid-template-columns: minmax(0, 1fr); }
-      .comments-heading,
-      .comments-column,
-      .footer-comment { display: none; }
-      .section { grid-template-columns: 150px minmax(0, 1fr); }
-      .footer { grid-template-columns: 150px minmax(0, 1fr); }
-      .metrics-list,
-      .industry-list { grid-template-columns: minmax(0, 1fr); }
+      .main-column { padding-right: 0; }
+      .comments-heading { display: none; }
+      .section-title,
+      .footer-label { width: 150px; }
+      .section-body { margin-left: 164px; }
+      .footer-copy { margin-left: 164px; }
+      .metric-item,
+      .industry-item { float: none; width: auto; margin-right: 0; }
     }
 
-    @media (max-width: 560px) {
+    @media screen and (max-width: 560px) {
       .page { padding-left: 54px; padding-right: 16px; }
-      .section,
-      .footer { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-      .experience-item { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .section-title,
+      .footer-label,
+      .experience-date { float: none; width: auto; }
+      .section-body,
+      .footer-copy { margin-left: 0; }
+      .experience-content { margin-left: 0; }
       .section-title { font-size: 22px; }
       .full-name { font-size: 27px; }
     }
 
-    @page { size: A4; margin: 8mm; }
+    /*
+      No browser page margin at all — the yellow paper fills every
+      physical page edge-to-edge, and its own (cloned, see .page below)
+      padding is what creates visual margin, on every page including
+      continuation ones. The PDF exporter (html-pdf-exporter.js) injects
+      its own "@page { margin: 8mm }" into <head> after this stylesheet,
+      which would otherwise win the cascade (same specificity, later
+      wins) and reintroduce a white border — !important stops that.
+    */
+    @page { size: A4; margin: 0 !important; }
 
     @media print {
       :root { --paper-line: 6.35mm; }
@@ -573,50 +548,49 @@
         line-height: 1.48;
       }
       .page {
-        width: 194mm;
-        min-height: 281mm;
-        margin: 0 auto;
-        padding: 7mm 6mm 7mm 13mm;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 15mm 14mm 15mm 21mm;
         border: 0;
         box-shadow: none;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
         background:
-          linear-gradient(90deg, transparent 0, transparent 10mm, var(--red-rule) 10mm, var(--red-rule) 10.35mm, transparent 10.35mm),
+          linear-gradient(90deg,
+            transparent 0, transparent 18mm, var(--red-rule) 18mm, var(--red-rule) 18.35mm, transparent 18.35mm,
+            transparent 164.9mm, rgba(40, 44, 78, .28) 164.9mm, rgba(40, 44, 78, .28) 165.15mm, transparent 165.15mm,
+            transparent 166mm, rgba(44, 47, 88, .78) 166mm, rgba(44, 47, 88, .78) 166.55mm, transparent 166.55mm),
           repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--paper-line) - .22mm), var(--rule) calc(var(--paper-line) - .22mm), var(--rule) var(--paper-line)),
           linear-gradient(135deg, var(--paper-light), var(--paper));
       }
-      .topline,
-      .resume-grid {
-        grid-template-columns: minmax(0, 1fr) 43mm;
-        gap: 4.5mm;
+      .topline {
+        min-height: 9mm;
       }
-      .topline { min-height: 9mm; }
+      .comments-heading { width: 30mm; }
+      .main-column { padding-right: 34mm; }
       .document-brand { min-height: 10mm; }
       .brand-word { font-size: 20pt; }
       .brand-systems { margin-top: 1.2mm; font-size: 22pt; }
       .brand-tagline { margin-top: 1.4mm; padding-left: 15mm; font-size: 4.8pt; }
       .comments-heading { font-size: 10pt; }
-      .comments-column {
-        min-height: 245mm;
-        padding: 3mm 1mm 5mm 4mm;
-        border-left-width: .55mm;
-      }
       .full-name { font-size: 21pt; }
       .role-line { font-size: 12.5pt; }
       .domain-line,
       .contact-block,
       .short-summary { font-size: 9.2pt; }
       .section {
-        grid-template-columns: 30mm minmax(0, 1fr);
-        gap: 3mm;
         margin: 1.3mm 0 2.3mm;
       }
-      .section-title { font-size: 15pt; }
+      .section-title { width: 30mm; font-size: 15pt; }
+      .section-body { margin-left: 33mm; }
       .objective-text { font-size: 10.5pt; }
-      .metrics-list { gap: .6mm 3mm; }
+      .metric-item { width: calc(50% - 1.5mm); margin: .3mm 0; }
+      .metric-item:nth-child(odd) { margin-right: 3mm; }
       .metric-value { font-size: 11.5pt; }
-      .industry-list { gap: 1.3mm 3mm; }
-      .industry-item { grid-template-columns: 6mm minmax(0, 1fr); gap: 1.3mm; }
-      .industry-letter { width: 5.5mm; height: 5.5mm; font-size: 8.8pt; border-width: .35mm; }
+      .industry-item { width: calc(50% - 1.5mm); margin-bottom: 1.3mm; }
+      .industry-item:nth-child(odd) { margin-right: 3mm; }
+      .industry-letter { width: 5.5mm; height: 5.5mm; margin-right: 1.3mm; font-size: 8.8pt; border-width: .35mm; }
       .industry-description,
       .project-description,
       .experience-company,
@@ -624,7 +598,9 @@
       .project-name,
       .tech-title,
       .experience-position { font-size: 10.5pt; }
-      .experience-item { grid-template-columns: 24mm minmax(0, 1fr); gap: 2.5mm; margin-bottom: 2mm; }
+      .experience-item { margin-bottom: 2mm; }
+      .experience-date { width: 24mm; }
+      .experience-content { margin-left: 26.5mm; }
       .note { margin-bottom: 7mm; font-size: 9.5pt; line-height: 1.58; }
       .note::before { left: -6mm; top: 2.6mm; width: 4.8mm; border-top-width: .5mm; }
       .note::after { left: -6.6mm; top: 1.8mm; width: 1.6mm; height: 1.6mm; border-width: 0 0 .5mm .5mm; }
@@ -633,13 +609,10 @@
       .note-projects { margin-top: 22mm; }
       .note-footer { margin-top: 28mm; }
       .footer {
-        grid-template-columns: 30mm minmax(0, 1fr) 43mm;
-        gap: 3mm;
         margin-top: 3mm;
       }
-      .footer-label { font-size: 14pt; }
-      .footer-copy,
-      .footer-comment { font-size: 9pt; }
+      .footer-label { width: 30mm; font-size: 14pt; }
+      .footer-copy { margin-left: 33mm; font-size: 9pt; }
       .section-title,
       .experience-position,
       .project-name,
@@ -843,14 +816,6 @@
           </section>
           <!--CVB:endsection techPanels-->
         </main>
-
-        <aside class="comments-column" aria-hidden="true">
-          <p class="note note-header">Keep personal details concise; optional biographical data may be omitted.</p>
-          <p class="note note-education">Begin with the most recent qualification and work backwards.</p>
-          <p class="note note-experience">Begin with the most recent employment and focus on measurable outcomes.</p>
-          <p class="note note-projects">Use short, specific examples that support the role you are targeting.</p>
-          <p class="note note-footer">Additional notes or reference information can be included at the end.</p>
-        </aside>
       </div>
 
       <footer class="footer">
@@ -859,7 +824,6 @@
           <p class="footer-tagline empty-safe">{{FOOTER_TAGLINE}}</p>
           <p class="additional-note empty-safe">{{ADDITIONAL_NOTE}}</p>
         </div>
-        <p class="footer-comment" aria-hidden="true">Keep the final section brief and relevant to the application.</p>
       </footer>
     </div>
   </article>

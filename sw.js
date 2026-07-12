@@ -9,7 +9,7 @@
 // resources/template/manifest.js: nothing can list a folder from
 // service-worker code. Adding a template there also means adding its
 // file here.
-const CACHE_NAME = 'cvb-cache-v2';
+const CACHE_NAME = 'cvb-cache-v3';
 
 const PRECACHE_URLS = [
   './',
