@@ -2602,7 +2602,7 @@ function showUpdateBanner(onUpdate) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').then(function (reg) {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
       reg.addEventListener('updatefound', function () {
         var nw = reg.installing;
         if (!nw) return;
