@@ -418,7 +418,19 @@ body { height: 100vh; overflow: hidden; }
 }
 .modal-form .field { margin-bottom: 14px; }
 .modal-form .field:last-child { margin-bottom: 0; }
+.modal-form .field.err { color: var(--error); font-size: 12px; font-weight: 600; }
 .modal-chip-area { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 20px; }
+.ai-dropzone {
+  border: 1.5px dashed var(--border2); border-radius: var(--rl); background: var(--bg2);
+  padding: 20px; text-align: center; color: var(--text2); font-size: 12.5px; cursor: pointer;
+}
+.ai-dropzone.drag-active { background: var(--bg3); border-color: var(--accent); color: var(--text); }
+.ai-stream-area {
+  max-height: 220px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+  font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5;
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--rl);
+  padding: 10px; margin-bottom: 10px;
+}
 
 .sidebar-scrim.visible { display: block; }
 
@@ -620,6 +632,8 @@ body { height: 100vh; overflow: hidden; }
         </div>
         <button class="btn btn-sm" id="btnOpen">Open</button>
         <input type="file" id="importFileInput" accept="application/json" class="hidden">
+        <div class="header-sep"></div>
+        <button class="btn btn-sm" id="btnAiGenerate">AI Generate</button>
         <button class="btn btn-sm hidden" id="btnInstallApp">Install App</button>
       </div>
     </div>
@@ -781,6 +795,18 @@ var STORAGE_KEY = 'cvbuilder-state';
 // they're the field schema the user has built up, unlike the numeric
 // values which are session-only (see STORAGE_KEY above).
 var METRICS_LABELS_KEY = 'cvbuilder-metrics-labels';
+
+// Anthropic API key for the AI Generate feature — persists across sessions
+// like THEME_KEY/METRICS_LABELS_KEY, unlike the session-only CV data above.
+var CLAUDE_API_KEY_KEY = 'cvbuilder-claude-api-key';
+
+function getStoredApiKey() {
+  try { return localStorage.getItem(CLAUDE_API_KEY_KEY) || ''; } catch (e) { return ''; }
+}
+
+function storeApiKey(key) {
+  try { localStorage.setItem(CLAUDE_API_KEY_KEY, key || ''); } catch (e) {}
+}
 
 var state = {
   data: createEmptyCVData(),
@@ -2314,6 +2340,348 @@ function applyOpenedJson(parsed, handle) {
   updateFileStatus();
 }
 
+/* ══════════════════════════════════════════════════
+   AI GENERATE — upload a CV document, send it to the Anthropic API, and
+   prefill the form. Direct browser fetch: no backend, so the API key
+   lives in localStorage on the user's own device (see CLAUDE_API_KEY_KEY
+   above) and is sent straight to Anthropic. Accepted risk for a
+   single-user, backend-free PWA with nowhere to hide the key instead.
+══════════════════════════════════════════════════ */
+
+var DOCX_LIB_LOADED = false;
+var DOCX_LIB_LOADING = null;
+
+function loadDocxLib() {
+  if (DOCX_LIB_LOADED) return Promise.resolve();
+  if (DOCX_LIB_LOADING) return DOCX_LIB_LOADING;
+  DOCX_LIB_LOADING = loadScriptOnce('resources/vendor/mammoth.browser.min.js', function () { return !!window.mammoth; })
+    .then(function () { DOCX_LIB_LOADED = true; });
+  return DOCX_LIB_LOADING;
+}
+
+function cvDataHasContent() {
+  var d = state.data;
+  if (d.personal.fullName || d.personal.roleTitle || d.personal.professionalSummary) return true;
+  return ['skills', 'industries', 'certifications', 'education', 'languages', 'experience', 'projects', 'techPanels']
+    .some(function (k) { return Array.isArray(d[k]) && d[k].length > 0; });
+}
+
+function readFileAs(file, method) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () { resolve(reader.result); };
+    reader.onerror = function () { reject(new Error('Could not read file.')); };
+    reader[method](file);
+  });
+}
+
+// Resolves to a single Claude Messages API content block describing the
+// uploaded file — a native `document`/`image` block for PDF/images (Claude
+// reads these itself), or a plain `text` block for .txt/.docx (extracted
+// client-side first, since the Messages API has no .docx content type).
+function fileToContentBlock(file) {
+  var name = file.name || '';
+  var ext = name.slice(name.lastIndexOf('.')).toLowerCase();
+  var isImage = /^image\//.test(file.type);
+
+  if (ext === '.pdf' || isImage) {
+    return readFileAs(file, 'readAsDataURL').then(function (dataUrl) {
+      var base64 = String(dataUrl).slice(String(dataUrl).indexOf(',') + 1);
+      var mediaType = file.type || (ext === '.pdf' ? 'application/pdf' : 'application/octet-stream');
+      return {
+        type: ext === '.pdf' ? 'document' : 'image',
+        source: { type: 'base64', media_type: mediaType, data: base64 },
+      };
+    });
+  }
+  if (ext === '.docx') {
+    return loadDocxLib()
+      .then(function () { return readFileAs(file, 'readAsArrayBuffer'); })
+      .then(function (buf) { return window.mammoth.extractRawText({ arrayBuffer: buf }); })
+      .then(function (result) { return { type: 'text', text: result.value || '' }; });
+  }
+  // .txt and anything else unrecognized — treat as plain text.
+  return readFileAs(file, 'readAsText').then(function (text) { return { type: 'text', text: text }; });
+}
+
+var AI_GENERATE_PROMPT = 'You are extracting structured CV data from the attached document. ' +
+  'Return ONLY a single JSON object (no markdown fences, no commentary) with exactly this shape:\n' +
+  '{\n' +
+  '  "personal": {"fullName": "", "roleTitle": "", "specialization": "", "primaryDomain": "", "location": "", "cityCountry": "", "email": "", "phone": "", "linkedinUrl": "", "shortProfileSummary": "", "professionalSummary": "", "footerTagline": "", "additionalNote": ""},\n' +
+  '  "metrics": [{"label": "", "value": 0}],\n' +
+  '  "skills": [{"label": ""}],\n' +
+  '  "industries": [{"title": "", "description": ""}],\n' +
+  '  "certifications": [{"title": ""}],\n' +
+  '  "education": [{"title": "", "org": "", "year": ""}],\n' +
+  '  "languages": [{"name": "", "level": ""}],\n' +
+  '  "experience": [{"position": "", "company": "", "location": "", "dateFrom": "", "dateTo": "", "achievements": [{"text": ""}]}],\n' +
+  '  "projects": [{"name": "", "description": ""}],\n' +
+  '  "techPanels": [{"title": "", "bullets": [{"text": ""}]}]\n' +
+  '}\n' +
+  'Leave unknown strings as "" and unknown arrays as []. ' +
+  'Write dates as free text, exactly as in the source (e.g. "Jan 2020", "2020-01", "Present"). ' +
+  'There are two tiers of fields, treated differently:\n' +
+  'TIER A — strict extraction, do NOT invent anything, only fill from evidence actually in the document: ' +
+  'personal.fullName, personal.roleTitle, personal.location, personal.cityCountry, personal.email, personal.phone, ' +
+  'personal.linkedinUrl, personal.footerTagline, personal.additionalNote, certifications, education, languages, ' +
+  'and experience (position/company/location/dateFrom/dateTo/achievements — copy achievement bullets as written ' +
+  'in the source, never fabricate new achievements, metrics, or numbers). ' +
+  'SKILLS (hybrid rule): first extract skills explicitly listed in the document. If the document has no skills ' +
+  'section or very few explicit skill entries, infer additional skills strictly from technologies/tools/' +
+  'methodologies actually mentioned elsewhere in the document (in experience or project descriptions) — never add ' +
+  'a skill with zero textual evidence anywhere in the document. ' +
+  'TIER B — promotional rewrite/generation, allowed to polish and use typical professional phrasing even if not ' +
+  'verbatim in the source, but must stay grounded in real facts already in the document (no inventing employers, ' +
+  'dates, technologies, or numeric results that do not appear anywhere in the source): ' +
+  'personal.specialization and personal.primaryDomain — synthesize confident, enterprise-sounding labels for this ' +
+  'person\'s specialization/primary domain based on real evidence in the document, not just a verbatim copy. ' +
+  'industries (title, description) — write a confident, enterprise, promotional-tone description of each industry ' +
+  'this person has real experience in per the document. ' +
+  'personal.professionalSummary and personal.shortProfileSummary — write a confident, enterprise, promotional-tone ' +
+  'professional summary aimed at showcasing this person, based on their real background in the document; ' +
+  'shortProfileSummary is a punchy 1-2 sentence version, professionalSummary is a fuller paragraph, both generated ' +
+  'together from the same real facts. ' +
+  'metrics — the metrics array MUST always contain EXACTLY 4 entries, no more, no fewer. Choose the 4 most ' +
+  'compelling/promotable metrics for this specific person based on what is actually in the document (e.g. years ' +
+  'of experience, number of projects/positions, certifications count, team size, APIs/services built, languages ' +
+  'spoken — pick whichever 4 best fit this document), with enterprise-promotional labels. Values must be derived ' +
+  'from real evidence in the document (count entries, compute year spans from dates, etc.) — you may reasonably ' +
+  'estimate/round from what is evident, but never invent a number with zero basis. This exact-4 rule is a hard ' +
+  'structural requirement. ' +
+  'projects (name, description) — rewrite each project description in a confident, enterprise, results-oriented ' +
+  'tone, based on what the document actually describes about that project. ' +
+  'techPanels (title, bullets) — group the real technologies/skills/tools mentioned anywhere in the document into ' +
+  '2-4 logical category panels (e.g. "Backend & APIs", "Cloud & DevOps", "Data & Integration" — pick categories ' +
+  'that actually fit what is in the document) with a short title per panel and bullets naming the real ' +
+  'technologies/skills found; do not invent technologies not mentioned anywhere in the document; always attempt ' +
+  'this grouping if the document mentions any technical skills/tools at all, only leave techPanels as [] if the ' +
+  'document has no technical content whatsoever.';
+
+// Streams the Messages API response via SSE and calls onDelta(text) for
+// every text chunk as it arrives, then resolves with the parsed CV JSON
+// once the stream ends. `onDelta` lets the status modal show live
+// progress instead of a single opaque wait for the whole response.
+function streamClaudeApi(apiKey, contentBlock, onDelta) {
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-5',
+      max_tokens: 8000,
+      stream: true,
+      messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: AI_GENERATE_PROMPT }] }],
+    }),
+  }).then(function (res) {
+    if (!res.ok) {
+      return res.json().catch(function () { return null; }).then(function (body) {
+        var msg = (body && body.error && body.error.message) || ('HTTP ' + res.status);
+        throw new Error(msg);
+      });
+    }
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+    var accumulated = '';
+
+    function handleEvent(block) {
+      var lines = block.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.slice(0, 6) !== 'data: ') continue;
+        var evt;
+        try { evt = JSON.parse(line.slice(6)); } catch (e) { continue; }
+        if (evt.type === 'content_block_delta' && evt.delta && evt.delta.type === 'text_delta') {
+          accumulated += evt.delta.text;
+          if (onDelta) onDelta(evt.delta.text);
+        } else if (evt.type === 'error') {
+          throw new Error((evt.error && evt.error.message) || 'Stream error.');
+        }
+      }
+    }
+
+    function pump() {
+      return reader.read().then(function (result) {
+        if (result.done) return;
+        buffer += decoder.decode(result.value, { stream: true });
+        var parts = buffer.split('\n\n');
+        buffer = parts.pop();
+        parts.forEach(handleEvent);
+        return pump();
+      });
+    }
+
+    return pump().then(function () { return accumulated; });
+  }).then(function (raw) {
+    raw = raw.trim();
+    var fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) raw = fenceMatch[1].trim();
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      throw new Error('Claude did not return valid JSON.');
+    }
+  });
+}
+
+// Second modal, opened on top of the AI Generate modal once the request
+// actually starts. Shows live streamed text; OK stays disabled (and
+// Escape/outside-click do nothing) until the stream finishes, then OK
+// closes both this modal and the AI Generate modal underneath.
+function openStreamStatusModal() {
+  var streamArea = h('pre', { class: 'ai-stream-area' }, []);
+  var statusLine = h('div', { class: 'field' }, ['Generating…']);
+  var body = h('div', { class: 'modal-form' }, [streamArea, statusLine]);
+
+  var modal = openModal({ title: 'Generating CV data…', bodyEl: body });
+  var overlay = document.querySelector('.modal-overlay:last-child');
+  var okBtn = overlay.querySelector('.modal-footer .btn-primary');
+  var busy = true;
+
+  okBtn.disabled = true;
+  okBtn.textContent = 'Generating…';
+
+  // Capture-phase guards on the same nodes openModal's own bubble-phase
+  // close handlers use — stopImmediatePropagation() during capture skips
+  // those handlers entirely for as long as busy stays true.
+  function guardKeydown(ev) { if (busy && ev.key === 'Escape') ev.stopImmediatePropagation(); }
+  function guardMousedown(ev) { if (busy) ev.stopImmediatePropagation(); }
+  document.addEventListener('keydown', guardKeydown, true);
+  overlay.addEventListener('mousedown', guardMousedown, true);
+
+  function appendText(text) {
+    streamArea.textContent += text;
+    streamArea.scrollTop = streamArea.scrollHeight;
+  }
+
+  function finish(success, msg) {
+    busy = false;
+    document.removeEventListener('keydown', guardKeydown, true);
+    statusLine.textContent = msg;
+    statusLine.className = 'field' + (success ? '' : ' err');
+    okBtn.disabled = false;
+    okBtn.textContent = 'OK';
+  }
+
+  return { appendText: appendText, finish: finish, okBtn: okBtn, close: modal.close };
+}
+
+function openAiGenerateModal() {
+  var fileInput = h('input', { type: 'file', class: 'input', accept: '.pdf,.txt,.docx,image/*' });
+  fileInput.style.display = 'none';
+  var keyInput = h('input', { class: 'input', type: 'password', placeholder: 'sk-ant-...', value: getStoredApiKey() });
+  keyInput.oninput = function () { storeApiKey(keyInput.value.trim()); };
+
+  var dropzoneText = h('div', {}, ['Drag & drop a file here, or click to browse']);
+  var dropzone = h('div', { class: 'ai-dropzone' }, [dropzoneText, fileInput]);
+
+  function showChosenFile() {
+    var file = fileInput.files && fileInput.files[0];
+    dropzoneText.textContent = file ? ('Selected: ' + file.name) : 'Drag & drop a file here, or click to browse';
+  }
+
+  dropzone.onclick = function () { fileInput.click(); };
+  fileInput.onchange = showChosenFile;
+  dropzone.ondragover = function (ev) { ev.preventDefault(); dropzone.classList.add('drag-active'); };
+  dropzone.ondragenter = function (ev) { ev.preventDefault(); dropzone.classList.add('drag-active'); };
+  dropzone.ondragleave = function () { dropzone.classList.remove('drag-active'); };
+  dropzone.ondrop = function (ev) {
+    ev.preventDefault();
+    dropzone.classList.remove('drag-active');
+    var files = ev.dataTransfer && ev.dataTransfer.files;
+    if (files && files.length) fileInput.files = files;
+    showChosenFile();
+  };
+
+  var confirmEl = h('div', { class: 'field hidden' }, []);
+  var statusEl = h('div', { class: 'field hidden' }, []);
+
+  var body = h('div', { class: 'modal-form' }, [
+    h('div', { class: 'field' }, [h('label', {}, ['CV document (PDF, TXT, DOCX, or image)']), dropzone]),
+    h('div', { class: 'field' }, [
+      h('label', {}, ['Anthropic API key']),
+      keyInput,
+      h('div', { class: 'empty-hint' }, ['Stored locally in this browser; sent directly to Anthropic when you click Generate.']),
+    ]),
+    confirmEl,
+    statusEl,
+  ]);
+
+  function setStatus(msg, isErr) {
+    statusEl.textContent = msg || '';
+    statusEl.className = 'field' + (isErr ? ' err' : '') + (msg ? '' : ' hidden');
+  }
+
+  function clearConfirm() {
+    confirmEl.innerHTML = '';
+    confirmEl.className = 'field hidden';
+  }
+
+  var modal = openModal({
+    title: 'AI Generate CV',
+    bodyEl: body,
+    saveLabel: 'Generate',
+    onSave: function (close) { startGeneration(close, false); },
+  });
+
+  var generateBtn = document.querySelector('.modal-overlay:last-child .modal-footer .btn-primary');
+
+  function setBusy(busy) {
+    fileInput.disabled = busy;
+    keyInput.disabled = busy;
+    if (generateBtn) {
+      generateBtn.disabled = busy;
+      generateBtn.textContent = busy ? 'Generating…' : 'Generate';
+    }
+  }
+
+  function startGeneration(close, skipGuard) {
+    var file = fileInput.files && fileInput.files[0];
+    var apiKey = keyInput.value.trim();
+    setStatus('');
+    if (!file) { setStatus('Choose a file first.', true); return; }
+    if (!apiKey) { setStatus('Enter your Anthropic API key.', true); return; }
+
+    if (!skipGuard && cvDataHasContent()) {
+      confirmEl.className = 'field';
+      confirmEl.innerHTML = '';
+      var saveFirstBtn = h('button', { class: 'btn btn-sm', type: 'button' }, ['Save current, then continue']);
+      var overwriteBtn = h('button', { class: 'btn btn-sm', type: 'button' }, ['Overwrite without saving']);
+      var cancelGuardBtn = h('button', { class: 'btn btn-sm', type: 'button' }, ['Cancel']);
+      saveFirstBtn.onclick = function () { clearConfirm(); saveFile(); startGeneration(close, true); };
+      overwriteBtn.onclick = function () { clearConfirm(); startGeneration(close, true); };
+      cancelGuardBtn.onclick = clearConfirm;
+      confirmEl.appendChild(h('div', {}, ['The form already has data. Save it before overwriting?']));
+      confirmEl.appendChild(saveFirstBtn);
+      confirmEl.appendChild(overwriteBtn);
+      confirmEl.appendChild(cancelGuardBtn);
+      return;
+    }
+
+    clearConfirm();
+    setBusy(true);
+
+    var statusModal = openStreamStatusModal();
+    statusModal.okBtn.onclick = function () { statusModal.close(); close(); };
+
+    fileToContentBlock(file).then(function (block) {
+      return streamClaudeApi(apiKey, block, statusModal.appendText);
+    }).then(function (parsed) {
+      applyOpenedJson(parsed, null);
+      setBusy(false);
+      statusModal.finish(true, 'Completed.');
+      showStatus('CV data generated from document.');
+    }).catch(function (err) {
+      setBusy(false);
+      statusModal.finish(false, 'Failed: ' + (err && err.message ? err.message : 'unknown error'));
+    });
+  }
+}
+
 function importJsonFile(file) {
   var reader = new FileReader();
   reader.onload = function () {
@@ -2432,6 +2800,7 @@ function init() {
   byId('btnThemeToggle').onclick = cycleTheme;
 
   byId('btnOpen').onclick = openFile;
+  byId('btnAiGenerate').onclick = openAiGenerateModal;
   byId('importFileInput').onchange = function (ev) {
     var file = ev.target.files && ev.target.files[0];
     if (file) importJsonFile(file);

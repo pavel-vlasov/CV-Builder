@@ -305,6 +305,26 @@
       background: var(--line);
     }
 
+    .experience-scroll {
+      max-height: 430px;
+      overflow-y: auto;
+      padding-right: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--line-strong) var(--paper-edge);
+    }
+
+    .experience-scroll::-webkit-scrollbar { width: 8px; }
+
+    .experience-scroll::-webkit-scrollbar-track {
+      background: var(--paper-edge);
+      border-radius: 999px;
+    }
+
+    .experience-scroll::-webkit-scrollbar-thumb {
+      background: var(--line-strong);
+      border-radius: 999px;
+    }
+
     .experience-item {
       position: relative;
       min-width: 0;
@@ -474,6 +494,7 @@
       .profile { margin-bottom: 9mm; }
       .section-title { font-size: 12px; margin-bottom: 12px; }
       .side-section, .main-section { margin-bottom: 23px; }
+      .experience-scroll { max-height: none; overflow: visible; padding-right: 0; }
       .contact-value, .side-copy, .education-item, .language-item,
       .certification-item, .industry-item, .skill-item,
       .experience-position, .experience-company, .achievement-list,
@@ -613,7 +634,7 @@
         <!--CVB:section experience-->
         <section class="main-section">
           <h2 class="section-title">Work Experience</h2>
-          <ol class="timeline-list">
+          <ol class="timeline-list experience-scroll">
             <!--CVB:repeat experience-->
             <li class="experience-item">
               <div class="experience-head">
